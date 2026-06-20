@@ -1,0 +1,1212 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Descubrimiento y Personalización",
+    "version": "1.0.0",
+    "description": "## Responsabilidad\nAyudar al usuario a encontrar contenido relevante: búsqueda, feeds personalizados,\nrecomendaciones, tendencias y ranking.\n\n## Alcance\n- **Incluye:** search, home feed, related videos, trending, señales de ranking, indexación\n- **Excluye:** almacenar comentarios, servir streams, pagar creadores, crear campañas\n\n## Modelo canónico\nEn este contexto un \"video\" es un **candidato de ranking con señales de interés**,\nno un archivo técnico ni un ítem editorial. El contexto devuelve referencias\n(`catalogItemId`) pero no duplica metadata completa del Catálogo.\n\n## Integración con otros contextos\n- **Consume eventos de:** Catálogo (contenido publicado/restringido), Audiencia (engagement), Publicación (sesión completada)\n- **Emite eventos:** búsqueda realizada, recomendación servida\n"
+  },
+  "servers": [
+    {
+      "url": "https://api.youtube-internal.com/discovery/v1",
+      "description": "Servidor de producción"
+    }
+  ],
+  "security": [
+    {
+      "BearerAuth": []
+    }
+  ],
+  "tags": [
+    {
+      "name": "Búsqueda",
+      "description": "Búsqueda de contenido y canales"
+    },
+    {
+      "name": "Feeds",
+      "description": "Feed de inicio personalizado por usuario"
+    },
+    {
+      "name": "Relacionados",
+      "description": "Contenido relacionado a un ítem dado"
+    },
+    {
+      "name": "Tendencias",
+      "description": "Trending y exploración por categoría"
+    },
+    {
+      "name": "Señales",
+      "description": "Captura de señales de comportamiento del usuario"
+    },
+    {
+      "name": "Indexación",
+      "description": "Indexación interna de contenido (uso interno / sistema)"
+    }
+  ],
+  "paths": {
+    "/search": {
+      "get": {
+        "summary": "Buscar contenido y canales",
+        "description": "Permite buscar videos y canales por texto libre con filtros y orden configurable. Registra internamente la búsqueda como señal (RF-D5).\n",
+        "operationId": "searchContent",
+        "tags": [
+          "Búsqueda"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          },
+          {}
+        ],
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": true,
+            "description": "Texto libre de búsqueda",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "example": "tutorial python"
+            }
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "description": "Tipo de resultado",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "video",
+                "channel",
+                "all"
+              ],
+              "default": "all"
+            }
+          },
+          {
+            "name": "duration",
+            "in": "query",
+            "description": "Filtro de duración (solo videos)",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "short",
+                "medium",
+                "long"
+              ]
+            }
+          },
+          {
+            "name": "uploadDate",
+            "in": "query",
+            "description": "Filtro por fecha de subida",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "hour",
+                "today",
+                "week",
+                "month",
+                "year"
+              ]
+            }
+          },
+          {
+            "name": "sortBy",
+            "in": "query",
+            "description": "Criterio de ordenación",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "relevance",
+                "date",
+                "viewCount",
+                "rating"
+              ],
+              "default": "relevance"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/PageParam"
+          },
+          {
+            "$ref": "#/components/parameters/PageSizeParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Resultados de búsqueda",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SearchResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      }
+    },
+    "/search/suggestions": {
+      "get": {
+        "summary": "Sugerencias de búsqueda (autocompletado)",
+        "description": "Devuelve sugerencias de términos mientras el usuario escribe.",
+        "operationId": "getSearchSuggestions",
+        "tags": [
+          "Búsqueda"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          },
+          {}
+        ],
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": true,
+            "description": "Prefijo de búsqueda",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "example": "tutorial py"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 10,
+              "maximum": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de sugerencias",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuggestionList"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          }
+        }
+      }
+    },
+    "/feeds/home": {
+      "get": {
+        "summary": "Obtener feed de inicio personalizado",
+        "description": "Genera un feed personalizado para el usuario autenticado o una versión genérica para sesiones anónimas.\n",
+        "operationId": "getHomeFeed",
+        "tags": [
+          "Feeds"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          },
+          {}
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PageParam"
+          },
+          {
+            "$ref": "#/components/parameters/PageSizeParam"
+          },
+          {
+            "name": "sessionId",
+            "in": "query",
+            "description": "ID de sesión anónima (usado cuando no hay usuario autenticado)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Feed personalizado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeedResult"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      }
+    },
+    "/feeds/home/{itemId}/reason": {
+      "get": {
+        "summary": "Explicación de por qué se recomienda un ítem",
+        "description": "Devuelve la razón interna por la que un ítem aparece en el feed del usuario (ej. \"porque viste X\", \"popular en tu región\").\n",
+        "operationId": "getFeedItemReason",
+        "tags": [
+          "Feeds"
+        ],
+        "parameters": [
+          {
+            "name": "itemId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Razón de recomendación",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecommendationReason"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/content/{catalogItemId}/related": {
+      "get": {
+        "summary": "Obtener videos relacionados a un contenido",
+        "description": "Devuelve una lista de contenidos relacionados considerando similitud temática, historial del usuario y señales de engagement.\n",
+        "operationId": "getRelatedContent",
+        "tags": [
+          "Relacionados"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          },
+          {}
+        ],
+        "parameters": [
+          {
+            "name": "catalogItemId",
+            "in": "path",
+            "required": true,
+            "description": "ID del ítem de catálogo de referencia",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/PageParam"
+          },
+          {
+            "$ref": "#/components/parameters/PageSizeParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de contenido relacionado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeedResult"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/trending": {
+      "get": {
+        "summary": "Obtener contenido trending",
+        "description": "Devuelve contenido en tendencia filtrable por región y/o categoría.",
+        "operationId": "getTrending",
+        "tags": [
+          "Tendencias"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          },
+          {}
+        ],
+        "parameters": [
+          {
+            "name": "region",
+            "in": "query",
+            "description": "Código de país ISO 3166-1 alpha-2",
+            "schema": {
+              "type": "string",
+              "example": "CL"
+            }
+          },
+          {
+            "name": "categoryId",
+            "in": "query",
+            "description": "Categoría de contenido",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/PageParam"
+          },
+          {
+            "$ref": "#/components/parameters/PageSizeParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Contenido trending",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeedResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/categories": {
+      "get": {
+        "summary": "Listar categorías disponibles para explorar",
+        "operationId": "listCategories",
+        "tags": [
+          "Tendencias"
+        ],
+        "security": [
+          {}
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de categorías",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CategoryList"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/categories/{categoryId}/content": {
+      "get": {
+        "summary": "Explorar contenido por categoría",
+        "operationId": "getContentByCategory",
+        "tags": [
+          "Tendencias"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          },
+          {}
+        ],
+        "parameters": [
+          {
+            "name": "categoryId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/PageParam"
+          },
+          {
+            "$ref": "#/components/parameters/PageSizeParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Contenido de la categoría",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeedResult"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/signals/impression": {
+      "post": {
+        "summary": "Registrar impresión de ítem en feed",
+        "description": "Se llama cuando un ítem aparece visible en pantalla para el usuario.",
+        "operationId": "recordImpression",
+        "tags": [
+          "Señales"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImpressionSignal"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Señal registrada"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      }
+    },
+    "/signals/click": {
+      "post": {
+        "summary": "Registrar click en ítem recomendado",
+        "operationId": "recordClick",
+        "tags": [
+          "Señales"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ClickSignal"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Señal registrada"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      }
+    },
+    "/signals/watch-time": {
+      "post": {
+        "summary": "Registrar tiempo de visualización como señal de interés",
+        "operationId": "recordWatchTime",
+        "tags": [
+          "Señales"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WatchTimeSignal"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Señal registrada"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          }
+        }
+      }
+    },
+    "/signals/users/{userId}/interest-profile": {
+      "get": {
+        "summary": "Consultar perfil de intereses de un usuario",
+        "description": "Devuelve las categorías e intereses inferidos del usuario a partir de sus señales.",
+        "operationId": "getUserInterestProfile",
+        "tags": [
+          "Señales"
+        ],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Perfil de intereses",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserInterestProfile"
+                }
+              }
+            }
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/index/content": {
+      "post": {
+        "summary": "Indexar nuevo contenido publicado",
+        "description": "Endpoint interno consumido al recibir el evento \"contenido publicado\" desde Catálogo. No expuesto a usuarios finales.\n",
+        "operationId": "indexContent",
+        "tags": [
+          "Indexación"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IndexRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Contenido indexado"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "409": {
+            "description": "El contenido ya estaba indexado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/index/content/{catalogItemId}": {
+      "put": {
+        "summary": "Actualizar ítem en el índice",
+        "description": "Actualiza metadata de ranking cuando el Catálogo actualiza el contenido.",
+        "operationId": "updateIndexedContent",
+        "tags": [
+          "Indexación"
+        ],
+        "parameters": [
+          {
+            "name": "catalogItemId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IndexUpdateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Índice actualizado"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Remover ítem del índice",
+        "description": "Se llama cuando el Catálogo despublica o restringe un contenido.",
+        "operationId": "removeFromIndex",
+        "tags": [
+          "Indexación"
+        ],
+        "parameters": [
+          {
+            "name": "catalogItemId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Ítem removido del índice"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "Token JWT obtenido del servicio de identidad compartido"
+      }
+    },
+    "parameters": {
+      "PageParam": {
+        "name": "page",
+        "in": "query",
+        "description": "Número de página (comienza en 1)",
+        "schema": {
+          "type": "integer",
+          "default": 1,
+          "minimum": 1
+        }
+      },
+      "PageSizeParam": {
+        "name": "pageSize",
+        "in": "query",
+        "description": "Cantidad de resultados por página",
+        "schema": {
+          "type": "integer",
+          "default": 20,
+          "maximum": 50
+        }
+      }
+    },
+    "schemas": {
+      "SearchResult": {
+        "type": "object",
+        "required": [
+          "items",
+          "pagination"
+        ],
+        "properties": {
+          "query": {
+            "type": "string"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SearchItem"
+            }
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/Pagination"
+          }
+        }
+      },
+      "SearchItem": {
+        "type": "object",
+        "required": [
+          "type",
+          "id"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "video",
+              "channel"
+            ]
+          },
+          "id": {
+            "type": "string",
+            "description": "catalogItemId o channelId según tipo"
+          },
+          "title": {
+            "type": "string"
+          },
+          "thumbnailUrl": {
+            "type": "string",
+            "format": "uri"
+          },
+          "channelId": {
+            "type": "string"
+          },
+          "publishedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "durationSeconds": {
+            "type": "integer",
+            "description": "Solo para type=video"
+          },
+          "rankScore": {
+            "type": "number",
+            "description": "Puntuación interna de relevancia"
+          }
+        }
+      },
+      "SuggestionList": {
+        "type": "object",
+        "required": [
+          "suggestions"
+        ],
+        "properties": {
+          "suggestions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "example": [
+              "tutorial python",
+              "tutorial python para principiantes"
+            ]
+          }
+        }
+      },
+      "FeedResult": {
+        "type": "object",
+        "required": [
+          "items",
+          "pagination"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FeedItem"
+            }
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/Pagination"
+          }
+        }
+      },
+      "FeedItem": {
+        "type": "object",
+        "required": [
+          "catalogItemId"
+        ],
+        "properties": {
+          "catalogItemId": {
+            "type": "string",
+            "description": "Referencia al ítem en el contexto de Catálogo"
+          },
+          "channelId": {
+            "type": "string"
+          },
+          "rankScore": {
+            "type": "number"
+          },
+          "reason": {
+            "type": "string",
+            "description": "Razón resumida de la recomendación"
+          },
+          "impressionToken": {
+            "type": "string",
+            "description": "Token opaco para registrar impresión/click correctamente"
+          }
+        }
+      },
+      "RecommendationReason": {
+        "type": "object",
+        "required": [
+          "catalogItemId",
+          "reason"
+        ],
+        "properties": {
+          "catalogItemId": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string",
+            "example": "Porque viste 'Aprende Python en 1 hora'"
+          },
+          "signals": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "example": [
+              "watch_history",
+              "category_affinity"
+            ]
+          }
+        }
+      },
+      "CategoryList": {
+        "type": "object",
+        "required": [
+          "categories"
+        ],
+        "properties": {
+          "categories": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Category"
+            }
+          }
+        }
+      },
+      "Category": {
+        "type": "object",
+        "required": [
+          "categoryId",
+          "name"
+        ],
+        "properties": {
+          "categoryId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string",
+            "example": "Tecnología"
+          },
+          "iconUrl": {
+            "type": "string",
+            "format": "uri"
+          }
+        }
+      },
+      "ImpressionSignal": {
+        "type": "object",
+        "required": [
+          "catalogItemId",
+          "context"
+        ],
+        "properties": {
+          "userId": {
+            "type": "string",
+            "description": "Nulo si sesión anónima"
+          },
+          "sessionId": {
+            "type": "string"
+          },
+          "catalogItemId": {
+            "type": "string"
+          },
+          "impressionToken": {
+            "type": "string"
+          },
+          "context": {
+            "type": "string",
+            "enum": [
+              "home_feed",
+              "search_results",
+              "related",
+              "trending"
+            ]
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ClickSignal": {
+        "type": "object",
+        "required": [
+          "catalogItemId",
+          "context"
+        ],
+        "properties": {
+          "userId": {
+            "type": "string"
+          },
+          "sessionId": {
+            "type": "string"
+          },
+          "catalogItemId": {
+            "type": "string"
+          },
+          "impressionToken": {
+            "type": "string"
+          },
+          "context": {
+            "type": "string",
+            "enum": [
+              "home_feed",
+              "search_results",
+              "related",
+              "trending"
+            ]
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "WatchTimeSignal": {
+        "type": "object",
+        "required": [
+          "catalogItemId",
+          "watchedSeconds",
+          "totalSeconds"
+        ],
+        "properties": {
+          "userId": {
+            "type": "string"
+          },
+          "catalogItemId": {
+            "type": "string"
+          },
+          "watchedSeconds": {
+            "type": "integer",
+            "description": "Segundos efectivamente vistos"
+          },
+          "totalSeconds": {
+            "type": "integer",
+            "description": "Duración total del video"
+          },
+          "completionRate": {
+            "type": "number",
+            "format": "float",
+            "description": "watchedSeconds / totalSeconds"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "UserInterestProfile": {
+        "type": "object",
+        "required": [
+          "userId",
+          "interests"
+        ],
+        "properties": {
+          "userId": {
+            "type": "string"
+          },
+          "interests": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InterestEntry"
+            }
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "InterestEntry": {
+        "type": "object",
+        "required": [
+          "categoryId",
+          "score"
+        ],
+        "properties": {
+          "categoryId": {
+            "type": "string"
+          },
+          "categoryName": {
+            "type": "string"
+          },
+          "score": {
+            "type": "number",
+            "format": "float",
+            "description": "Puntuación de afinidad 0.0 - 1.0"
+          }
+        }
+      },
+      "IndexRequest": {
+        "type": "object",
+        "required": [
+          "catalogItemId",
+          "channelId",
+          "title",
+          "publishedAt"
+        ],
+        "properties": {
+          "catalogItemId": {
+            "type": "string"
+          },
+          "channelId": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "categoryId": {
+            "type": "string"
+          },
+          "durationSeconds": {
+            "type": "integer"
+          },
+          "region": {
+            "type": "string",
+            "description": "Región de disponibilidad"
+          },
+          "publishedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "IndexUpdateRequest": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "categoryId": {
+            "type": "string"
+          },
+          "restricted": {
+            "type": "boolean",
+            "description": "true = remover de resultados públicos"
+          }
+        }
+      },
+      "Pagination": {
+        "type": "object",
+        "required": [
+          "page",
+          "pageSize",
+          "totalItems",
+          "totalPages"
+        ],
+        "properties": {
+          "page": {
+            "type": "integer"
+          },
+          "pageSize": {
+            "type": "integer"
+          },
+          "totalItems": {
+            "type": "integer"
+          },
+          "totalPages": {
+            "type": "integer"
+          }
+        }
+      },
+      "Error": {
+        "type": "object",
+        "required": [
+          "code",
+          "message"
+        ],
+        "properties": {
+          "code": {
+            "type": "string",
+            "example": "ITEM_ALREADY_INDEXED"
+          },
+          "message": {
+            "type": "string",
+            "example": "El contenido ya se encuentra en el índice"
+          },
+          "details": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        }
+      }
+    },
+    "responses": {
+      "BadRequest": {
+        "description": "Parámetros inválidos",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "Unauthorized": {
+        "description": "Token ausente o inválido",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "Forbidden": {
+        "description": "Sin permisos para este recurso",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "NotFound": {
+        "description": "Recurso no encontrado",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      }
+    }
+  }
+}
