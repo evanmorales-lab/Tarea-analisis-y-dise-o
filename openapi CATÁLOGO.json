@@ -1,0 +1,1444 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Catálogo Editorial y Derechos API",
+    "version": "1.0.0",
+    "description": "Bounded context responsable de **qué contenido existe públicamente, cómo se\npresenta y bajo qué reglas puede mostrarse** (legal, territorial, etaria, de\nmoderación).\n\n### Alcance\n**Sí cubre:** canales, metadata editorial, publicación, playlists, derechos,\nrestricciones.\n**No cubre:** transcoding, ranking de recomendaciones, comentarios, facturación —\nesas responsabilidades viven en otros bounded contexts (Publicación y distribución\nde contenido, Descubrimiento y personalización, Audiencia/comunidad/engagement,\nMonetización del ecosistema creador).\n\n### Restricciones de diseño clave\n- Acá \"video\" es un **ítem de catálogo**, no un archivo — el modelo es\n  intencionalmente distinto al `VideoAsset` del contexto de Publicación, aunque\n  ambos compartan el mismo `videoAssetId`.\n- Un asset puede existir sin estar publicado (tienen ciclos de vida\n  independientes).\n- La visibilidad depende de reglas editoriales y legales, no de infraestructura de\n  streaming.\n- Las restricciones (edad, geografía, monetización) **no** cambian el `status`\n  general de un contenido — se evalúan aparte, en el momento de consultar\n  visibilidad, sobre un mismo contenido que puede seguir `published`.\n\n### Eventos consumidos (integración asíncrona)\n- `AssetReadyForPublishing` (desde Publicación) — habilita crear un borrador de\n  catálogo para ese `videoAssetId`. Mientras no se reciba este evento, `POST\n  /content` rechaza la creación con `ASSET_NOT_READY`.\n\n### Eventos emitidos (integración asíncrona, fuera del alcance REST de este documento)\n- `ContentPublished` / `ContentUnpublished` / `ContentUpdated` — consumidos por\n  Descubrimiento, Monetización y Publicidad.\n- `RestrictionApplied` / `RestrictionLifted`.\n- `ClaimCreated` / `ClaimResolved`.\n"
+  },
+  "servers": [
+    {
+      "url": "https://api.youtube-clone.example/catalog/v1",
+      "description": "Servidor de ejemplo"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Channels",
+      "description": "Gestión de canales editoriales"
+    },
+    {
+      "name": "Content",
+      "description": "Metadata editorial, publicación y visibilidad de contenido"
+    },
+    {
+      "name": "Playlists",
+      "description": "Colecciones ordenadas de contenido"
+    },
+    {
+      "name": "Claims",
+      "description": "Reclamaciones de derechos"
+    },
+    {
+      "name": "Restrictions",
+      "description": "Restricciones de edad, geografía y monetización"
+    }
+  ],
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ],
+  "paths": {
+    "/channels": {
+      "x-rf-section": "RF-C1 — Gestión de canales",
+      "post": {
+        "operationId": "createChannel",
+        "tags": [
+          "Channels"
+        ],
+        "summary": "Crear un canal asociado a un creador",
+        "description": "Requiere rol `creator`. El `creatorId` se obtiene del token, no del cuerpo.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChannelCreateInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Canal creado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Channel"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      }
+    },
+    "/channels/{channelId}": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/ChannelIdParam"
+        }
+      ],
+      "get": {
+        "operationId": "getChannel",
+        "tags": [
+          "Channels"
+        ],
+        "summary": "Consultar la información pública del canal",
+        "responses": {
+          "200": {
+            "description": "Detalle del canal",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Channel"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      },
+      "patch": {
+        "operationId": "updateChannel",
+        "tags": [
+          "Channels"
+        ],
+        "summary": "Actualizar nombre, descripción o imagen del canal",
+        "description": "Requiere rol `creator`, dueño del canal. Actualización parcial.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChannelUpdateInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Canal actualizado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Channel"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/channels/{channelId}/content": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/ChannelIdParam"
+        }
+      ],
+      "get": {
+        "operationId": "listChannelContent",
+        "tags": [
+          "Channels"
+        ],
+        "summary": "Listar el contenido publicado de un canal",
+        "description": "Puerta pública (cualquiera puede consultarla). Solo devuelve contenido en\nestado `published` — nunca borradores, que son privados del creador.\n",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PageParam"
+          },
+          {
+            "$ref": "#/components/parameters/PageSizeParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista paginada de contenido publicado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedCatalogItems"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/content": {
+      "x-rf-section": "RF-C2 — Creación y edición editorial",
+      "post": {
+        "operationId": "createCatalogItem",
+        "tags": [
+          "Content"
+        ],
+        "summary": "Vincular un asset técnico con su metadata editorial",
+        "description": "Crea el ítem de catálogo en estado `draft` (RF-C2, viñetas 1, 2 y 3). Requiere\nrol `creator`, dueño del `channelId` indicado.\n\n**Validación importante:** el `videoAssetId` debe corresponder a un asset que\nCatálogo ya recibió como técnicamente listo (evento `AssetReadyForPublishing`\nconsumido desde Publicación). Si todavía no se recibió ese evento, se rechaza\ncon `409 ASSET_NOT_READY`. Esta validación se hace contra el registro interno\nde eventos recibidos, no contra una consulta síncrona a Publicación — así\nCatálogo no depende de que Publicación esté disponible en el momento.\n",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CatalogItemCreateInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Contenido creado en borrador",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CatalogItem"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "El videoAssetId aún no fue notificado como listo por Publicación",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/content/{contentId}": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/ContentIdParam"
+        }
+      ],
+      "get": {
+        "operationId": "getCatalogItem",
+        "tags": [
+          "Content"
+        ],
+        "summary": "Consultar un contenido",
+        "description": "No surge de una viñeta explícita; es necesaria para poder editar o mostrar el\ncontenido. Si está en `draft`, solo lo puede ver el `creator` dueño del canal;\nsi está `published`, lo puede ver cualquiera.\n",
+        "responses": {
+          "200": {
+            "description": "Detalle del contenido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CatalogItem"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      },
+      "patch": {
+        "operationId": "updateCatalogItem",
+        "tags": [
+          "Content"
+        ],
+        "summary": "Editar metadata de un contenido existente",
+        "description": "Requiere rol `creator`, dueño del contenido. Actualización parcial (RF-C2, viñeta 4).",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CatalogItemUpdateInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Contenido actualizado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CatalogItem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/content/{contentId}/publish": {
+      "x-rf-section": "RF-C3 — Publicación y visibilidad",
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/ContentIdParam"
+        }
+      ],
+      "post": {
+        "operationId": "publishCatalogItem",
+        "tags": [
+          "Content"
+        ],
+        "summary": "Publicar un contenido",
+        "description": "Requiere rol `creator`. Pasa el estado a `published`.",
+        "responses": {
+          "200": {
+            "description": "Contenido publicado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CatalogItem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/content/{contentId}/unpublish": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/ContentIdParam"
+        }
+      ],
+      "post": {
+        "operationId": "unpublishCatalogItem",
+        "tags": [
+          "Content"
+        ],
+        "summary": "Despublicar u ocultar un contenido",
+        "description": "Requiere rol `creator`. Pasa el estado a `unpublished`.",
+        "responses": {
+          "200": {
+            "description": "Contenido despublicado"
+          }
+        }
+      }
+    },
+    "/content/{contentId}/visibility": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/ContentIdParam"
+        }
+      ],
+      "get": {
+        "operationId": "getCatalogItemVisibility",
+        "tags": [
+          "Content"
+        ],
+        "summary": "Consultar si el contenido es visible para un espectador puntual",
+        "description": "Paso central del escenario integrador (sección 13 del enunciado): se llama\nantes de reproducir un video. País y edad son datos del espectador que aporta\nquien llama (la identidad de usuario es una plataforma compartida, fuera de\neste bounded context). El estado de moderación y las restricciones activas\n(RF-C6) ya los tiene Catálogo internamente.\n",
+        "parameters": [
+          {
+            "name": "country",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "CL"
+            }
+          },
+          {
+            "name": "age",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 25
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Resultado de la verificación de visibilidad",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VisibilityResult"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/playlists": {
+      "x-rf-section": "RF-C4 — Playlists",
+      "post": {
+        "operationId": "createPlaylist",
+        "tags": [
+          "Playlists"
+        ],
+        "summary": "Crear una playlist",
+        "description": "Requiere rol `creator`, dueño del `channelId` indicado.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlaylistCreateInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Playlist creada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Playlist"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/playlists/{playlistId}": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/PlaylistIdParam"
+        }
+      ],
+      "get": {
+        "operationId": "getPlaylist",
+        "tags": [
+          "Playlists"
+        ],
+        "summary": "Consultar una playlist con su orden",
+        "responses": {
+          "200": {
+            "description": "Detalle de la playlist con sus ítems en orden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Playlist"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/playlists/{playlistId}/items": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/PlaylistIdParam"
+        }
+      ],
+      "post": {
+        "operationId": "addPlaylistItem",
+        "tags": [
+          "Playlists"
+        ],
+        "summary": "Agregar un contenido a la playlist",
+        "description": "Requiere rol `creator`, dueño de la playlist.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlaylistItemAddInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Ítem agregado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Playlist"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "operationId": "reorderPlaylistItems",
+        "tags": [
+          "Playlists"
+        ],
+        "summary": "Reordenar los ítems de la playlist",
+        "description": "Reemplaza el orden completo en una sola operación (en vez de mover ítems de a\nuno), mandando la lista completa de `contentId` en el nuevo orden. Requiere rol\n`creator`, dueño de la playlist.\n",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlaylistReorderInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Playlist reordenada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Playlist"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/playlists/{playlistId}/items/{contentId}": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/PlaylistIdParam"
+        },
+        {
+          "$ref": "#/components/parameters/ContentIdParam"
+        }
+      ],
+      "delete": {
+        "operationId": "removePlaylistItem",
+        "tags": [
+          "Playlists"
+        ],
+        "summary": "Quitar un contenido de la playlist",
+        "description": "Acá sí se usa DELETE: quitar un ítem es borrar de verdad esa relación de\npertenencia (el contenido en sí no se borra). Requiere rol `creator`, dueño de\nla playlist.\n",
+        "responses": {
+          "204": {
+            "description": "Ítem quitado"
+          }
+        }
+      }
+    },
+    "/channels/{channelId}/playlists": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/ChannelIdParam"
+        }
+      ],
+      "get": {
+        "operationId": "listChannelPlaylists",
+        "tags": [
+          "Playlists"
+        ],
+        "summary": "Listar las playlists de un canal",
+        "description": "No surge de una viñeta explícita; es necesaria para poder navegar hacia cualquier playlist.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PageParam"
+          },
+          {
+            "$ref": "#/components/parameters/PageSizeParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista paginada de playlists",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedPlaylists"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/content/{contentId}/claims": {
+      "x-rf-section": "RF-C5 — Derechos y reclamaciones",
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/ContentIdParam"
+        }
+      ],
+      "post": {
+        "operationId": "createClaim",
+        "tags": [
+          "Claims"
+        ],
+        "summary": "Registrar una reclamación de derechos sobre un contenido",
+        "description": "Requiere rol `rights_entity`. Nace en estado `pending`.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ClaimCreateInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Reclamación registrada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Claim"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "operationId": "listClaims",
+        "tags": [
+          "Claims"
+        ],
+        "summary": "Listar las reclamaciones de un contenido",
+        "description": "No surge de una viñeta explícita; es necesaria para poder revisarlas.",
+        "responses": {
+          "200": {
+            "description": "Lista de reclamaciones (sin paginar; volumen acotado por contenido)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Claim"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/content/{contentId}/claims/{claimId}": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/ContentIdParam"
+        },
+        {
+          "$ref": "#/components/parameters/ClaimIdParam"
+        }
+      ],
+      "get": {
+        "operationId": "getClaim",
+        "tags": [
+          "Claims"
+        ],
+        "summary": "Consultar el detalle de una reclamación",
+        "responses": {
+          "200": {
+            "description": "Detalle de la reclamación",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Claim"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/content/{contentId}/claims/{claimId}/resolve": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/ContentIdParam"
+        },
+        {
+          "$ref": "#/components/parameters/ClaimIdParam"
+        }
+      ],
+      "post": {
+        "operationId": "resolveClaim",
+        "tags": [
+          "Claims"
+        ],
+        "summary": "Resolver una reclamación (aceptar, disputar o retirar)",
+        "description": "Requiere rol `creator` o un rol de moderación interna. Aceptar una reclamación\n**no** restringe el contenido automáticamente — eso es una acción aparte,\nexplícita, en `/content/{contentId}/restrictions` (RF-C6).\n",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ClaimResolveInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Reclamación resuelta",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Claim"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/content/{contentId}/restrictions": {
+      "x-rf-section": "RF-C6 — Políticas y restricciones",
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/ContentIdParam"
+        }
+      ],
+      "post": {
+        "operationId": "applyRestriction",
+        "tags": [
+          "Restrictions"
+        ],
+        "summary": "Aplicar una restricción de contenido",
+        "description": "Requiere rol `creator` o moderación interna (RF-C6, viñeta 1). El contenido NO\ncambia su `status` general — la restricción se evalúa aparte en\n`/visibility`.\n",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RestrictionCreateInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Restricción aplicada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Restriction"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "operationId": "listRestrictions",
+        "tags": [
+          "Restrictions"
+        ],
+        "summary": "Consultar el historial y el estado actual de restricciones",
+        "description": "Cubre RF-C6 viñetas 2 y 3 con un mismo listado: los registros sin\n`liftedAt` son las restricciones activas ahora mismo; los que sí tienen\n`liftedAt` son historial.\n",
+        "responses": {
+          "200": {
+            "description": "Lista de restricciones (sin paginar; volumen acotado por contenido)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Restriction"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/content/{contentId}/restrictions/{restrictionId}/lift": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/ContentIdParam"
+        },
+        {
+          "$ref": "#/components/parameters/RestrictionIdParam"
+        }
+      ],
+      "post": {
+        "operationId": "liftRestriction",
+        "tags": [
+          "Restrictions"
+        ],
+        "summary": "Levantar una restricción",
+        "description": "No se usa DELETE a propósito: borrar el registro perdería el historial que\npide RF-C6 viñeta 2. En cambio, se marca `liftedAt` y el registro se conserva.\nRequiere rol `creator` o moderación interna.\n",
+        "responses": {
+          "200": {
+            "description": "Restricción levantada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Restriction"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "Token JWT del actor autenticado (RNF-1). Roles relevantes en este contexto:\n- `creator`: dueño del canal/contenido (gestiona canal, edita, publica, arma playlists)\n- `viewer`: cualquier usuario que consulta contenido público\n- `rights_entity`: tercero autorizado para presentar reclamaciones de derechos\nEl rol requerido para cada operación se indica en su descripción.\n"
+      }
+    },
+    "parameters": {
+      "ChannelIdParam": {
+        "name": "channelId",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "format": "uuid"
+        }
+      },
+      "ContentIdParam": {
+        "name": "contentId",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "format": "uuid"
+        }
+      },
+      "PlaylistIdParam": {
+        "name": "playlistId",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "format": "uuid"
+        }
+      },
+      "ClaimIdParam": {
+        "name": "claimId",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "format": "uuid"
+        }
+      },
+      "RestrictionIdParam": {
+        "name": "restrictionId",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "format": "uuid"
+        }
+      },
+      "PageParam": {
+        "name": "page",
+        "in": "query",
+        "schema": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 1
+        }
+      },
+      "PageSizeParam": {
+        "name": "pageSize",
+        "in": "query",
+        "schema": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100,
+          "default": 20
+        }
+      }
+    },
+    "responses": {
+      "Unauthorized": {
+        "description": "No autenticado o sin permisos para esta operación",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "NotFound": {
+        "description": "El recurso solicitado no existe",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      }
+    },
+    "schemas": {
+      "Error": {
+        "type": "object",
+        "required": [
+          "code",
+          "message"
+        ],
+        "properties": {
+          "code": {
+            "type": "string",
+            "example": "CONTENT_NOT_FOUND"
+          },
+          "message": {
+            "type": "string",
+            "example": "El contenido solicitado no existe"
+          },
+          "details": {
+            "type": "object",
+            "additionalProperties": true,
+            "nullable": true
+          }
+        }
+      },
+      "Channel": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "creatorId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "imageUrl": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ChannelCreateInput": {
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "imageUrl": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true
+          }
+        }
+      },
+      "ChannelUpdateInput": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "imageUrl": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true
+          }
+        }
+      },
+      "CatalogItem": {
+        "type": "object",
+        "description": "Modelo propio de este contexto. NO es el mismo modelo que VideoAsset en Publicación: acá \"video\" es un ítem editorial, no un archivo técnico. Comparte el videoAssetId como referencia, no como estructura de datos.\n",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "videoAssetId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "channelId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "category": {
+            "type": "string",
+            "nullable": true
+          },
+          "thumbnailUrl": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "published",
+              "unpublished"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "CatalogItemSummary": {
+        "type": "object",
+        "description": "Versión liviana de CatalogItem usada en listados paginados.",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "channelId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "title": {
+            "type": "string"
+          },
+          "thumbnailUrl": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "published",
+              "unpublished"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "CatalogItemCreateInput": {
+        "type": "object",
+        "required": [
+          "videoAssetId",
+          "channelId",
+          "title"
+        ],
+        "properties": {
+          "videoAssetId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "channelId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "category": {
+            "type": "string",
+            "nullable": true
+          },
+          "thumbnailUrl": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true
+          }
+        }
+      },
+      "CatalogItemUpdateInput": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "category": {
+            "type": "string",
+            "nullable": true
+          },
+          "thumbnailUrl": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true
+          }
+        }
+      },
+      "PaginatedCatalogItems": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CatalogItemSummary"
+            }
+          },
+          "page": {
+            "type": "integer"
+          },
+          "pageSize": {
+            "type": "integer"
+          },
+          "totalItems": {
+            "type": "integer"
+          },
+          "totalPages": {
+            "type": "integer"
+          }
+        }
+      },
+      "VisibilityResult": {
+        "type": "object",
+        "properties": {
+          "visible": {
+            "type": "boolean"
+          },
+          "reason": {
+            "type": "string",
+            "nullable": true,
+            "example": "Bloqueado por restricción geográfica"
+          }
+        }
+      },
+      "Playlist": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "channelId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "items": {
+            "type": "array",
+            "description": "Orden implícito por la posición en este arreglo, no se guarda un campo \"position\" aparte.",
+            "items": {
+              "$ref": "#/components/schemas/PlaylistItem"
+            }
+          }
+        }
+      },
+      "PlaylistItem": {
+        "type": "object",
+        "properties": {
+          "contentId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "addedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "PlaylistSummary": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "channelId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "itemCount": {
+            "type": "integer"
+          }
+        }
+      },
+      "PaginatedPlaylists": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlaylistSummary"
+            }
+          },
+          "page": {
+            "type": "integer"
+          },
+          "pageSize": {
+            "type": "integer"
+          },
+          "totalItems": {
+            "type": "integer"
+          },
+          "totalPages": {
+            "type": "integer"
+          }
+        }
+      },
+      "PlaylistCreateInput": {
+        "type": "object",
+        "required": [
+          "name",
+          "channelId"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "channelId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "PlaylistItemAddInput": {
+        "type": "object",
+        "required": [
+          "contentId"
+        ],
+        "properties": {
+          "contentId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "position": {
+            "type": "integer",
+            "nullable": true,
+            "description": "Posición donde insertar; si se omite, se agrega al final."
+          }
+        }
+      },
+      "PlaylistReorderInput": {
+        "type": "object",
+        "required": [
+          "contentIds"
+        ],
+        "properties": {
+          "contentIds": {
+            "type": "array",
+            "description": "Lista completa de IDs en el nuevo orden deseado.",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        }
+      },
+      "Claim": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "contentId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "claimantId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "accepted",
+              "disputed",
+              "withdrawn"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "resolvedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "ClaimCreateInput": {
+        "type": "object",
+        "required": [
+          "reason"
+        ],
+        "properties": {
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "ClaimResolveInput": {
+        "type": "object",
+        "required": [
+          "resolution"
+        ],
+        "properties": {
+          "resolution": {
+            "type": "string",
+            "enum": [
+              "accepted",
+              "disputed",
+              "withdrawn"
+            ]
+          }
+        }
+      },
+      "Restriction": {
+        "type": "object",
+        "description": "Registro de una restricción aplicada. Nunca se borra: levantarla solo completa liftedAt, conservando el historial (RF-C6, viñeta 2).\n",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "contentId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "minimum_age",
+              "geo_block",
+              "monetization_limit"
+            ]
+          },
+          "details": {
+            "type": "object",
+            "additionalProperties": true,
+            "example": {
+              "minAge": 18
+            }
+          },
+          "appliedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "liftedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "RestrictionCreateInput": {
+        "type": "object",
+        "required": [
+          "type",
+          "details"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "minimum_age",
+              "geo_block",
+              "monetization_limit"
+            ]
+          },
+          "details": {
+            "type": "object",
+            "additionalProperties": true,
+            "example": {
+              "blockedCountries": [
+                "XX",
+                "YY"
+              ]
+            }
+          }
+        }
+      },
+      "AssetReadyForPublishingEvent": {
+        "type": "object",
+        "description": "Evento consumido desde el bounded context de Publicación y distribución de contenido. Habilita la creación de un borrador de catálogo para ese asset.\n",
+        "properties": {
+          "eventType": {
+            "type": "string",
+            "enum": [
+              "AssetReadyForPublishing"
+            ]
+          },
+          "videoAssetId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "creatorId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "durationSeconds": {
+            "type": "number"
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    }
+  }
+}
