@@ -1,0 +1,1606 @@
+{
+  "openapi": "3.0.4",
+  "info": {
+    "title": "Contexto 5 - Monetizacion del ecosistema creador",
+    "version": "1.0.0",
+    "description": "## Responsabilidad\nGestionar como los creadores ganan dinero y como se registran, calculan y pagan esos ingresos.\n\n## Alcance\n- Si: elegibilidad, revenue share, membresias de canal, propinas, saldo, payouts, reportes.\n- No: crear campanas de anunciantes, recomendar videos, procesar video.\n\n## Modelo canonico propio\nEn este contexto un 'video' es una UNIDAD MONETIZABLE y un 'canal' es una CUENTA con saldo e ingresos. Solo se comparten identificadores (channelId, videoId) con otros contextos, nunca el modelo completo (RNF-2).\n\n## Integracion\n- Consume: 'ingreso publicitario confirmado' (Contexto 6 - Publicidad), 'contenido publicado/restringido' (Contexto 2 - Catalogo).\n- Emite: 'monetizacion habilitada/deshabilitada', 'ingreso atribuido a creador', 'pago procesado'.\n- El endpoint POST /integration/ad-revenue-confirmed realiza la dependencia 'Publicidad genera ingresos que Monetizacion atribuye al creador'."
+  },
+  "servers": [
+    {
+      "url": "/api/v1"
+    }
+  ],
+  "tags": [
+    {
+      "name": "elegibilidad",
+      "description": "RF-M1 Alta y elegibilidad de monetizacion"
+    },
+    {
+      "name": "productos-creador",
+      "description": "RF-M2 Membresias y propinas"
+    },
+    {
+      "name": "ingresos",
+      "description": "RF-M3 Registro de ingresos"
+    },
+    {
+      "name": "ganancias",
+      "description": "RF-M4 Consulta de ganancias"
+    },
+    {
+      "name": "pagos",
+      "description": "RF-M5 Saldo, retiros y documentacion fiscal"
+    },
+    {
+      "name": "integracion",
+      "description": "Eventos consumidos desde otros contextos"
+    }
+  ],
+  "paths": {
+    "/channels/{channelId}/monetization-requests": {
+      "post": {
+        "tags": [
+          "elegibilidad"
+        ],
+        "operationId": "requestMonetization",
+        "summary": "Solicitar monetizar un canal.",
+        "description": "El creador solicita habilitar la monetizacion. Se evaluan requisitos de elegibilidad (suscriptores, horas de visualizacion, cumplimiento de politicas).",
+        "parameters": [
+          {
+            "name": "channelId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonetizationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Solicitud creada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MonetizationRequest"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Entrada no valida",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "creator_oauth": [
+              "read:earnings",
+              "write:monetization"
+            ]
+          }
+        ]
+      }
+    },
+    "/channels/{channelId}/monetization-status": {
+      "get": {
+        "tags": [
+          "elegibilidad"
+        ],
+        "operationId": "getMonetizationStatus",
+        "summary": "Consultar el estado de elegibilidad y activacion.",
+        "parameters": [
+          {
+            "name": "channelId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operacion exitosa",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MonetizationStatus"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Canal no encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "creator_oauth": [
+              "read:earnings",
+              "write:monetization"
+            ]
+          }
+        ]
+      }
+    },
+    "/channels/{channelId}/monetization": {
+      "put": {
+        "tags": [
+          "elegibilidad"
+        ],
+        "operationId": "toggleMonetization",
+        "summary": "Activar o desactivar la monetizacion del canal o contenido.",
+        "description": "Emite el evento 'monetizacion habilitada/deshabilitada'.",
+        "parameters": [
+          {
+            "name": "channelId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonetizationToggle"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Operacion exitosa",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IntegrationEvent"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Canal no apto",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Canal no encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "creator_oauth": [
+              "read:earnings",
+              "write:monetization"
+            ]
+          }
+        ]
+      }
+    },
+    "/channels/{channelId}/membership-tiers": {
+      "post": {
+        "tags": [
+          "productos-creador"
+        ],
+        "operationId": "createMembershipTier",
+        "summary": "Definir un nivel de membresia (precio y beneficios).",
+        "parameters": [
+          {
+            "name": "channelId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MembershipTier"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Nivel creado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MembershipTier"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "creator_oauth": [
+              "read:earnings",
+              "write:monetization"
+            ]
+          }
+        ]
+      },
+      "get": {
+        "tags": [
+          "productos-creador"
+        ],
+        "operationId": "listMembershipTiers",
+        "summary": "Listar los niveles de membresia del canal.",
+        "parameters": [
+          {
+            "name": "channelId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operacion exitosa",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MembershipTierPage"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "creator_oauth": [
+              "read:earnings",
+              "write:monetization"
+            ]
+          }
+        ]
+      }
+    },
+    "/channels/{channelId}/memberships": {
+      "post": {
+        "tags": [
+          "productos-creador"
+        ],
+        "operationId": "buyMembership",
+        "summary": "Registrar la compra de una membresia.",
+        "description": "Genera un ingreso confirmado (fuente = membership) atribuido al creador.",
+        "parameters": [
+          {
+            "name": "channelId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Membership"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Membresia registrada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Membership"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Nivel no encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "creator_oauth": [
+              "read:earnings",
+              "write:monetization"
+            ]
+          }
+        ]
+      }
+    },
+    "/channels/{channelId}/tips": {
+      "post": {
+        "tags": [
+          "productos-creador"
+        ],
+        "operationId": "sendTip",
+        "summary": "Registrar una propina sobre un canal o video.",
+        "parameters": [
+          {
+            "name": "channelId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Tip"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Propina registrada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Tip"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Monto invalido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "creator_oauth": [
+              "read:earnings",
+              "write:monetization"
+            ]
+          }
+        ]
+      }
+    },
+    "/revenue-events": {
+      "post": {
+        "tags": [
+          "ingresos"
+        ],
+        "operationId": "registerRevenue",
+        "summary": "Registrar un evento de ingreso (cualquier fuente).",
+        "description": "Aplica las reglas de reparto (revenue share) segun la fuente.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterRevenueRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Ingreso registrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RevenueEvent"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Monto invalido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "creator_oauth": [
+              "read:earnings",
+              "write:monetization"
+            ]
+          }
+        ]
+      }
+    },
+    "/channels/{channelId}/revenue-events": {
+      "get": {
+        "tags": [
+          "ingresos"
+        ],
+        "operationId": "listRevenue",
+        "summary": "Listar los ingresos de un canal con filtros por fuente y estado.",
+        "parameters": [
+          {
+            "name": "channelId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "source",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/RevenueSource"
+            }
+          },
+          {
+            "name": "state",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/RevenueState"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operacion exitosa",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RevenueEventPage"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "creator_oauth": [
+              "read:earnings",
+              "write:monetization"
+            ]
+          }
+        ]
+      }
+    },
+    "/channels/{channelId}/earnings": {
+      "get": {
+        "tags": [
+          "ganancias"
+        ],
+        "operationId": "getEarnings",
+        "summary": "Consultar ganancias por periodo.",
+        "parameters": [
+          {
+            "name": "channelId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "groupBy",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "day",
+                "month"
+              ],
+              "default": "month"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operacion exitosa",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EarningsSummary"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "creator_oauth": [
+              "read:earnings",
+              "write:monetization"
+            ]
+          }
+        ]
+      }
+    },
+    "/channels/{channelId}/earnings/by-video": {
+      "get": {
+        "tags": [
+          "ganancias"
+        ],
+        "operationId": "getEarningsByVideo",
+        "summary": "Desglose de ganancias por video.",
+        "parameters": [
+          {
+            "name": "channelId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operacion exitosa",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EarningsBreakdownItem"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "creator_oauth": [
+              "read:earnings",
+              "write:monetization"
+            ]
+          }
+        ]
+      }
+    },
+    "/channels/{channelId}/earnings/report": {
+      "get": {
+        "tags": [
+          "ganancias"
+        ],
+        "operationId": "getEarningsReport",
+        "summary": "Generar un reporte exportable (json o csv).",
+        "parameters": [
+          {
+            "name": "channelId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "format",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "json",
+                "csv"
+              ],
+              "default": "json"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Reporte generado"
+          }
+        },
+        "security": [
+          {
+            "creator_oauth": [
+              "read:earnings",
+              "write:monetization"
+            ]
+          }
+        ]
+      }
+    },
+    "/channels/{channelId}/balance": {
+      "get": {
+        "tags": [
+          "pagos"
+        ],
+        "operationId": "getBalance",
+        "summary": "Consultar el saldo disponible del creador.",
+        "parameters": [
+          {
+            "name": "channelId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operacion exitosa",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Balance"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "creator_oauth": [
+              "read:earnings",
+              "write:monetization"
+            ]
+          }
+        ]
+      }
+    },
+    "/channels/{channelId}/payouts": {
+      "post": {
+        "tags": [
+          "pagos"
+        ],
+        "operationId": "requestPayout",
+        "summary": "Solicitar un retiro cuando se supere el minimo.",
+        "description": "Valida el umbral minimo y la documentacion fiscal. Emite 'pago procesado'.",
+        "parameters": [
+          {
+            "name": "channelId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PayoutRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Retiro procesado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Payout"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Saldo insuficiente o falta documentacion",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "creator_oauth": [
+              "read:earnings",
+              "write:monetization"
+            ]
+          }
+        ]
+      },
+      "get": {
+        "tags": [
+          "pagos"
+        ],
+        "operationId": "listPayouts",
+        "summary": "Consultar el historial de pagos.",
+        "parameters": [
+          {
+            "name": "channelId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Operacion exitosa",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PayoutPage"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "creator_oauth": [
+              "read:earnings",
+              "write:monetization"
+            ]
+          }
+        ]
+      }
+    },
+    "/channels/{channelId}/tax-info": {
+      "put": {
+        "tags": [
+          "pagos"
+        ],
+        "operationId": "setTaxInfo",
+        "summary": "Registrar la documentacion fiscal requerida para cobrar.",
+        "parameters": [
+          {
+            "name": "channelId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TaxInfo"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Operacion exitosa",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaxInfo"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "creator_oauth": [
+              "read:earnings",
+              "write:monetization"
+            ]
+          }
+        ]
+      }
+    },
+    "/integration/ad-revenue-confirmed": {
+      "post": {
+        "tags": [
+          "integracion"
+        ],
+        "operationId": "onAdRevenueConfirmed",
+        "summary": "Consumir el evento de ingreso publicitario del Contexto 6.",
+        "description": "Aplica el reparto y atribuye el ingreso al creador. Emite 'CreatorRevenueAttributed'.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdRevenueConfirmedEvent"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Operacion exitosa",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IntegrationEvent"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "creator_oauth": [
+              "read:earnings",
+              "write:monetization"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "EligibilityStatus": {
+        "type": "string",
+        "enum": [
+          "pending",
+          "approved",
+          "rejected"
+        ],
+        "description": "pending=pendiente, approved=apto, rejected=rechazado"
+      },
+      "MonetizationScope": {
+        "type": "string",
+        "enum": [
+          "channel",
+          "content"
+        ]
+      },
+      "RevenueSource": {
+        "type": "string",
+        "enum": [
+          "advertising",
+          "membership",
+          "tip"
+        ]
+      },
+      "RevenueState": {
+        "type": "string",
+        "enum": [
+          "pending",
+          "confirmed",
+          "paid"
+        ]
+      },
+      "PayoutStatus": {
+        "type": "string",
+        "enum": [
+          "requested",
+          "processing",
+          "completed",
+          "failed"
+        ]
+      },
+      "MonetizationRequest": {
+        "type": "object",
+        "required": [
+          "subscribersCount",
+          "watchHours",
+          "policyCompliant"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "readOnly": true
+          },
+          "channelId": {
+            "type": "integer",
+            "format": "int64",
+            "readOnly": true
+          },
+          "subscribersCount": {
+            "type": "integer",
+            "example": 1500
+          },
+          "watchHours": {
+            "type": "integer",
+            "example": 4200
+          },
+          "policyCompliant": {
+            "type": "boolean",
+            "example": true
+          },
+          "status": {
+            "$ref": "#/components/schemas/EligibilityStatus"
+          },
+          "requestedAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          }
+        }
+      },
+      "MonetizationStatus": {
+        "type": "object",
+        "properties": {
+          "channelId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "eligibility": {
+            "$ref": "#/components/schemas/EligibilityStatus"
+          },
+          "monetizationEnabled": {
+            "type": "boolean"
+          }
+        }
+      },
+      "MonetizationToggle": {
+        "type": "object",
+        "required": [
+          "enabled"
+        ],
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "scope": {
+            "$ref": "#/components/schemas/MonetizationScope"
+          }
+        }
+      },
+      "MembershipTier": {
+        "type": "object",
+        "required": [
+          "name",
+          "priceMonthly"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "readOnly": true
+          },
+          "channelId": {
+            "type": "integer",
+            "format": "int64",
+            "readOnly": true
+          },
+          "name": {
+            "type": "string",
+            "example": "Super fan"
+          },
+          "priceMonthly": {
+            "type": "number",
+            "format": "double",
+            "example": 4.99
+          },
+          "currency": {
+            "type": "string",
+            "default": "USD"
+          },
+          "benefits": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "Membership": {
+        "type": "object",
+        "required": [
+          "tierId",
+          "viewerId"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "readOnly": true
+          },
+          "channelId": {
+            "type": "integer",
+            "format": "int64",
+            "readOnly": true
+          },
+          "tierId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "viewerId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "startedAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "active": {
+            "type": "boolean",
+            "readOnly": true
+          }
+        }
+      },
+      "Tip": {
+        "type": "object",
+        "required": [
+          "viewerId",
+          "amount"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "readOnly": true
+          },
+          "channelId": {
+            "type": "integer",
+            "format": "int64",
+            "readOnly": true
+          },
+          "videoId": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "viewerId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "amount": {
+            "type": "number",
+            "format": "double",
+            "example": 5.0
+          },
+          "currency": {
+            "type": "string",
+            "default": "USD"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          }
+        }
+      },
+      "RegisterRevenueRequest": {
+        "type": "object",
+        "required": [
+          "channelId",
+          "source",
+          "grossAmount"
+        ],
+        "properties": {
+          "channelId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "videoId": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "source": {
+            "$ref": "#/components/schemas/RevenueSource"
+          },
+          "grossAmount": {
+            "type": "number",
+            "format": "double"
+          },
+          "currency": {
+            "type": "string",
+            "default": "USD"
+          }
+        }
+      },
+      "RevenueEvent": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "channelId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "videoId": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "source": {
+            "$ref": "#/components/schemas/RevenueSource"
+          },
+          "grossAmount": {
+            "type": "number",
+            "format": "double"
+          },
+          "creatorShare": {
+            "type": "number",
+            "format": "double",
+            "example": 0.55
+          },
+          "netAmount": {
+            "type": "number",
+            "format": "double"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "state": {
+            "$ref": "#/components/schemas/RevenueState"
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "EarningsBreakdownItem": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "netAmount": {
+            "type": "number",
+            "format": "double"
+          },
+          "rpm": {
+            "type": "number",
+            "format": "double"
+          }
+        }
+      },
+      "EarningsSummary": {
+        "type": "object",
+        "properties": {
+          "channelId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "from": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "to": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "groupBy": {
+            "type": "string"
+          },
+          "totalNet": {
+            "type": "number",
+            "format": "double"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "rpm": {
+            "type": "number",
+            "format": "double"
+          },
+          "byVideo": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EarningsBreakdownItem"
+            }
+          },
+          "bySource": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EarningsBreakdownItem"
+            }
+          }
+        }
+      },
+      "Balance": {
+        "type": "object",
+        "properties": {
+          "channelId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "available": {
+            "type": "number",
+            "format": "double"
+          },
+          "pending": {
+            "type": "number",
+            "format": "double"
+          },
+          "currency": {
+            "type": "string"
+          }
+        }
+      },
+      "PayoutRequest": {
+        "type": "object",
+        "required": [
+          "amount"
+        ],
+        "properties": {
+          "amount": {
+            "type": "number",
+            "format": "double",
+            "example": 150.0
+          }
+        }
+      },
+      "Payout": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "channelId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "amount": {
+            "type": "number",
+            "format": "double"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/PayoutStatus"
+          },
+          "requestedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "processedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "TaxInfo": {
+        "type": "object",
+        "required": [
+          "legalName",
+          "taxId",
+          "country"
+        ],
+        "properties": {
+          "channelId": {
+            "type": "integer",
+            "format": "int64",
+            "readOnly": true
+          },
+          "legalName": {
+            "type": "string"
+          },
+          "taxId": {
+            "type": "string"
+          },
+          "country": {
+            "type": "string",
+            "example": "CL"
+          },
+          "documentType": {
+            "type": "string",
+            "default": "W-8BEN"
+          }
+        }
+      },
+      "AdRevenueConfirmedEvent": {
+        "type": "object",
+        "required": [
+          "eventId",
+          "channelId",
+          "videoId",
+          "campaignId",
+          "billableAmount"
+        ],
+        "properties": {
+          "eventId": {
+            "type": "string",
+            "example": "evt-ad-001"
+          },
+          "channelId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "videoId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "campaignId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "billableAmount": {
+            "type": "number",
+            "format": "double",
+            "example": 12.4
+          },
+          "currency": {
+            "type": "string",
+            "default": "USD"
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "description": "Contrato de evento compartido con el Contexto 6 (Publicidad)."
+      },
+      "IntegrationEvent": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "payload": {
+            "type": "object"
+          },
+          "emittedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ApiError": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "MembershipTierPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MembershipTier"
+            }
+          },
+          "pageNumber": {
+            "type": "integer"
+          },
+          "pageSize": {
+            "type": "integer"
+          },
+          "total": {
+            "type": "integer"
+          }
+        }
+      },
+      "RevenueEventPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RevenueEvent"
+            }
+          },
+          "pageNumber": {
+            "type": "integer"
+          },
+          "pageSize": {
+            "type": "integer"
+          },
+          "total": {
+            "type": "integer"
+          }
+        }
+      },
+      "PayoutPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Payout"
+            }
+          },
+          "pageNumber": {
+            "type": "integer"
+          },
+          "pageSize": {
+            "type": "integer"
+          },
+          "total": {
+            "type": "integer"
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "creator_oauth": {
+        "type": "oauth2",
+        "flows": {
+          "authorizationCode": {
+            "authorizationUrl": "https://accounts.example.com/oauth/authorize",
+            "tokenUrl": "https://accounts.example.com/oauth/token",
+            "scopes": {
+              "read:earnings": "leer ganancias y saldo",
+              "write:monetization": "configurar monetizacion y retiros"
+            }
+          }
+        }
+      },
+      "api_key": {
+        "type": "apiKey",
+        "name": "api_key",
+        "in": "header"
+      }
+    }
+  }
+}
