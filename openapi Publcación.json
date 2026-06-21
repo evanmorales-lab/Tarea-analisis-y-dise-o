@@ -1,0 +1,1069 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Publicación y Distribución de Contenido API",
+    "version": "1.0.0",
+    "description": "Bounded context responsable del **ciclo de vida técnico del video**: subida,\nprocesamiento, almacenamiento, reproducción y transmisión en vivo.\n\n### Alcance\n**Sí cubre:** upload, transcoding, streaming, sesiones de playback, live.\n**No cubre:** título/descripción del video, comentarios, recomendaciones, pagos,\ncampañas publicitarias — esas responsabilidades viven en otros bounded contexts\n(Catálogo editorial y derechos, Descubrimiento y personalización, Monetización\ndel ecosistema creador, Publicidad y marketplace de anunciantes).\n\n### Restricciones de diseño clave\n- Este contexto conoce al video como **archivo/stream técnico**, nunca como\n  producto editorial.\n- **No decide si un contenido es visible al público** — esa responsabilidad es\n  exclusiva del contexto de Catálogo editorial y derechos. El endpoint de\n  playback-info asume que la visibilidad ya fue validada antes de llegar acá.\n\n### Eventos emitidos (integración asíncrona, fuera del alcance REST de este documento)\n- `ContentUploaded` — el archivo terminó de subirse completamente.\n- `ProcessingCompleted` / `ProcessingFailed` — el procesamiento técnico terminó.\n- `AssetReadyForPublishing` — el asset está listo técnicamente; consumido por\n  **Catálogo editorial y derechos**.\n- `PlaybackSessionCompleted` — una sesión de reproducción terminó; consumido por\n  **Descubrimiento y personalización**.\n- `LiveStreamStarted` / `LiveStreamEnded` — cambios de estado de una transmisión en vivo.\n"
+  },
+  "servers": [
+    {
+      "url": "https://api.youtube-clone.example/publication/v1",
+      "description": "Servidor de ejemplo"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Video Assets",
+      "description": "Ciclo de vida del archivo técnico del video (subida, procesamiento, consulta)"
+    },
+    {
+      "name": "Playback",
+      "description": "Reproducción y sesiones de visualización"
+    },
+    {
+      "name": "Live Streams",
+      "description": "Transmisiones en vivo"
+    }
+  ],
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ],
+  "paths": {
+    "/video-assets": {
+      "post": {
+        "operationId": "createVideoAsset",
+        "tags": [
+          "Video Assets"
+        ],
+        "summary": "Iniciar la subida de un nuevo video",
+        "description": "Crea la ficha técnica del video en estado `uploading`. Requiere rol `creator`.\nA partir de acá se puede subir el archivo completo (`/content`) o por partes (`/parts`).\n",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VideoAssetCreateInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Video creado, listo para recibir el archivo",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VideoAsset"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      },
+      "get": {
+        "operationId": "listVideoAssets",
+        "tags": [
+          "Video Assets"
+        ],
+        "summary": "Listar los videos de un creador (RF-P5)",
+        "description": "Requiere rol `creator`. Resultado paginado (RNF-3).",
+        "parameters": [
+          {
+            "name": "creatorId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/PageParam"
+          },
+          {
+            "$ref": "#/components/parameters/PageSizeParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista paginada de videos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedVideoAssets"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      }
+    },
+    "/video-assets/{videoAssetId}": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/VideoAssetIdParam"
+        }
+      ],
+      "get": {
+        "operationId": "getVideoAsset",
+        "tags": [
+          "Video Assets"
+        ],
+        "summary": "Consultar el detalle técnico de un video (RF-P5)",
+        "description": "Requiere rol `creator` o `viewer`. Incluye duración, renditions y estado.",
+        "responses": {
+          "200": {
+            "description": "Detalle del video",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VideoAsset"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/video-assets/{videoAssetId}/content": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/VideoAssetIdParam"
+        }
+      ],
+      "put": {
+        "operationId": "uploadVideoAssetContent",
+        "tags": [
+          "Video Assets"
+        ],
+        "summary": "Subir el archivo completo (modo de subida única)",
+        "description": "Modo de subida en una sola operación. No se usa junto con `/parts`.\nRequiere rol `creator` y que el video esté en estado `uploading`.\n",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/octet-stream": {
+              "schema": {
+                "type": "string",
+                "format": "binary"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Archivo recibido, subida marcada como completa",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VideoAsset"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "El video no está en estado `uploading`",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/video-assets/{videoAssetId}/parts/{partNumber}": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/VideoAssetIdParam"
+        },
+        {
+          "name": "partNumber",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "integer",
+            "minimum": 1
+          }
+        }
+      ],
+      "put": {
+        "operationId": "uploadVideoAssetPart",
+        "tags": [
+          "Video Assets"
+        ],
+        "summary": "Subir una parte del archivo (modo de subida por partes)",
+        "description": "Requiere rol `creator`.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/octet-stream": {
+              "schema": {
+                "type": "string",
+                "format": "binary"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Parte recibida correctamente"
+          }
+        }
+      }
+    },
+    "/video-assets/{videoAssetId}/complete-upload": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/VideoAssetIdParam"
+        }
+      ],
+      "post": {
+        "operationId": "completeVideoAssetUpload",
+        "tags": [
+          "Video Assets"
+        ],
+        "summary": "Finalizar la subida por partes",
+        "description": "Valida que todas las partes hayan llegado correctamente (RF-P1, viñeta 5) y dispara\nautomáticamente el procesamiento técnico (RF-P2, viñeta 1). Requiere rol `creator`.\n",
+        "responses": {
+          "200": {
+            "description": "Subida validada, procesamiento iniciado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VideoAsset"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Faltan partes o la validación de integridad falló",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/video-assets/{videoAssetId}/cancel-upload": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/VideoAssetIdParam"
+        }
+      ],
+      "post": {
+        "operationId": "cancelVideoAssetUpload",
+        "tags": [
+          "Video Assets"
+        ],
+        "summary": "Cancelar una subida en curso",
+        "description": "Requiere rol `creator`. Deja el video en estado `uploadCancelled`.",
+        "responses": {
+          "200": {
+            "description": "Subida cancelada"
+          },
+          "409": {
+            "description": "El video no está en un estado cancelable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/video-assets/{videoAssetId}/retry-processing": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/VideoAssetIdParam"
+        }
+      ],
+      "post": {
+        "operationId": "retryVideoAssetProcessing",
+        "tags": [
+          "Video Assets"
+        ],
+        "summary": "Reintentar un procesamiento fallido",
+        "description": "Requiere rol `creator`. Solo válido si el video está en estado `failed`.",
+        "responses": {
+          "200": {
+            "description": "Procesamiento reintentado"
+          },
+          "409": {
+            "description": "El video no está en estado `failed`",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/video-assets/{videoAssetId}/playback-info": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/VideoAssetIdParam"
+        }
+      ],
+      "get": {
+        "operationId": "getPlaybackInfo",
+        "tags": [
+          "Playback"
+        ],
+        "summary": "Obtener la información técnica para reproducir el video",
+        "description": "Adapta la respuesta según dispositivo, región y ancho de banda (RF-P3, viñeta 2).\nRequiere rol `viewer`. **No valida visibilidad editorial** — eso ya debió validarlo\nel contexto de Catálogo antes de llegar acá.\n",
+        "parameters": [
+          {
+            "name": "device",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "mobile",
+                "desktop",
+                "tv",
+                "tablet"
+              ]
+            }
+          },
+          {
+            "name": "region",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "bandwidth",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "example": "2.5mbps"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Información de reproducción",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlaybackInfo"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/video-assets/{videoAssetId}/playback-sessions": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/VideoAssetIdParam"
+        }
+      ],
+      "post": {
+        "operationId": "startPlaybackSession",
+        "tags": [
+          "Playback"
+        ],
+        "summary": "Iniciar una sesión de reproducción",
+        "description": "Requiere rol `viewer`.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlaybackSessionStartInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Sesión de reproducción creada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlaybackSession"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/video-assets/{videoAssetId}/playback-sessions/{sessionId}": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/VideoAssetIdParam"
+        },
+        {
+          "name": "sessionId",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      ],
+      "patch": {
+        "operationId": "updatePlaybackSession",
+        "tags": [
+          "Playback"
+        ],
+        "summary": "Reportar progreso o marcar finalización de una sesión",
+        "description": "Mismo endpoint cubre progreso intermedio y finalización (RF-P3, viñetas 3 y 4):\nel cliente manda `status: completed` para cerrar la sesión. Requiere rol `viewer`.\n",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlaybackSessionUpdateInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Sesión actualizada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlaybackSession"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/live-streams": {
+      "post": {
+        "operationId": "createLiveStream",
+        "tags": [
+          "Live Streams"
+        ],
+        "summary": "Configurar una nueva transmisión en vivo",
+        "description": "Crea el live y devuelve en la misma respuesta los datos de conexión (`ingestUrl`,\n`streamKey`) para emitir desde software externo como OBS (RF-P4, viñetas 1 y 2).\nRequiere rol `creator`.\n",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LiveStreamCreateInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Live configurado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LiveStream"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/live-streams/{liveStreamId}": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/LiveStreamIdParam"
+        }
+      ],
+      "get": {
+        "operationId": "getLiveStream",
+        "tags": [
+          "Live Streams"
+        ],
+        "summary": "Consultar el estado actual del live",
+        "description": "No surge directamente de una viñeta del enunciado, pero es necesario como soporte\npara que el creador sepa si puede pausar/finalizar. Requiere rol `creator`.\n",
+        "responses": {
+          "200": {
+            "description": "Detalle del live",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LiveStream"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/live-streams/{liveStreamId}/start": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/LiveStreamIdParam"
+        }
+      ],
+      "post": {
+        "operationId": "startLiveStream",
+        "tags": [
+          "Live Streams"
+        ],
+        "summary": "Iniciar la transmisión",
+        "description": "Requiere rol `creator`.",
+        "responses": {
+          "200": {
+            "description": "Live iniciado, pasa a estado `live`"
+          }
+        }
+      }
+    },
+    "/live-streams/{liveStreamId}/pause": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/LiveStreamIdParam"
+        }
+      ],
+      "post": {
+        "operationId": "pauseLiveStream",
+        "tags": [
+          "Live Streams"
+        ],
+        "summary": "Pausar la transmisión",
+        "description": "Requiere rol `creator`.",
+        "responses": {
+          "200": {
+            "description": "Live pausado, pasa a estado `paused`"
+          }
+        }
+      }
+    },
+    "/live-streams/{liveStreamId}/end": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/LiveStreamIdParam"
+        }
+      ],
+      "post": {
+        "operationId": "endLiveStream",
+        "tags": [
+          "Live Streams"
+        ],
+        "summary": "Finalizar la transmisión",
+        "description": "Requiere rol `creator`. Pasa a estado `ended`.",
+        "responses": {
+          "200": {
+            "description": "Live finalizado"
+          }
+        }
+      }
+    },
+    "/live-streams/{liveStreamId}/convert-to-vod": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/LiveStreamIdParam"
+        }
+      ],
+      "post": {
+        "operationId": "convertLiveStreamToVod",
+        "tags": [
+          "Live Streams"
+        ],
+        "summary": "Generar un video on-demand a partir de la grabación del live",
+        "description": "Acción explícita y no automática (RF-P4, viñeta 4: \"debe **poder** generar\", no\n\"debe generar automáticamente\"). Crea un nuevo `VideoAsset` y lo vincula vía\n`recordedVideoAssetId`. Requiere rol `creator` y que el live esté en estado `ended`.\n",
+        "responses": {
+          "202": {
+            "description": "Conversión iniciada, se generará un nuevo VideoAsset",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VideoAsset"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "El live no está en estado `ended`",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "Token JWT del actor autenticado (RNF-1). Roles relevantes en este contexto:\n- `creator`: dueño del contenido (sube, procesa, transmite en vivo)\n- `viewer`: cualquier usuario que reproduce contenido\nEl rol requerido para cada operación se indica en su descripción.\n"
+      }
+    },
+    "parameters": {
+      "VideoAssetIdParam": {
+        "name": "videoAssetId",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "format": "uuid"
+        }
+      },
+      "LiveStreamIdParam": {
+        "name": "liveStreamId",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "format": "uuid"
+        }
+      },
+      "PageParam": {
+        "name": "page",
+        "in": "query",
+        "schema": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 1
+        }
+      },
+      "PageSizeParam": {
+        "name": "pageSize",
+        "in": "query",
+        "schema": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100,
+          "default": 20
+        }
+      }
+    },
+    "responses": {
+      "Unauthorized": {
+        "description": "No autenticado o sin permisos para esta operación",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "NotFound": {
+        "description": "El recurso solicitado no existe",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      }
+    },
+    "schemas": {
+      "Error": {
+        "type": "object",
+        "required": [
+          "code",
+          "message"
+        ],
+        "properties": {
+          "code": {
+            "type": "string",
+            "example": "VIDEO_NOT_FOUND"
+          },
+          "message": {
+            "type": "string",
+            "example": "El video solicitado no existe"
+          },
+          "details": {
+            "type": "object",
+            "additionalProperties": true,
+            "nullable": true
+          }
+        }
+      },
+      "VideoAsset": {
+        "type": "object",
+        "description": "Asset técnico del video. Modelo propio de este contexto: NO es el mismo modelo que \"Video\" en Catálogo editorial (que es un ítem editorial, no un archivo).\n",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "creatorId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "uploading",
+              "uploadCancelled",
+              "pending",
+              "processing",
+              "ready",
+              "failed"
+            ]
+          },
+          "durationSeconds": {
+            "type": "number",
+            "nullable": true
+          },
+          "uploadProgress": {
+            "$ref": "#/components/schemas/UploadProgress"
+          },
+          "renditions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Rendition"
+            }
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "VideoAssetSummary": {
+        "type": "object",
+        "description": "Versión liviana de VideoAsset usada en listados paginados.",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "creatorId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "uploading",
+              "uploadCancelled",
+              "pending",
+              "processing",
+              "ready",
+              "failed"
+            ]
+          },
+          "durationSeconds": {
+            "type": "number",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "UploadProgress": {
+        "type": "object",
+        "properties": {
+          "partsUploaded": {
+            "type": "integer"
+          },
+          "totalParts": {
+            "type": "integer",
+            "nullable": true
+          },
+          "percentage": {
+            "type": "number"
+          }
+        }
+      },
+      "Rendition": {
+        "type": "object",
+        "description": "Una calidad generada del video (RF-P2, viñeta 2). Cada una con su propio estado.",
+        "properties": {
+          "quality": {
+            "type": "string",
+            "example": "720p"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "processing",
+              "ready",
+              "failed"
+            ]
+          },
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true
+          }
+        }
+      },
+      "VideoAssetCreateInput": {
+        "type": "object",
+        "properties": {
+          "originalFilename": {
+            "type": "string",
+            "example": "mi-video-final.mp4"
+          },
+          "fileSizeBytes": {
+            "type": "integer",
+            "nullable": true,
+            "description": "Tamaño estimado, útil para decidir si conviene subir por partes."
+          }
+        }
+      },
+      "PaginatedVideoAssets": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/VideoAssetSummary"
+            }
+          },
+          "page": {
+            "type": "integer"
+          },
+          "pageSize": {
+            "type": "integer"
+          },
+          "totalItems": {
+            "type": "integer"
+          },
+          "totalPages": {
+            "type": "integer"
+          }
+        }
+      },
+      "PlaybackInfo": {
+        "type": "object",
+        "properties": {
+          "videoAssetId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "selectedQuality": {
+            "type": "string"
+          },
+          "manifestUrl": {
+            "type": "string",
+            "format": "uri"
+          },
+          "availableQualities": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "PlaybackSession": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "videoAssetId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "device": {
+            "type": "string"
+          },
+          "region": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "in_progress",
+              "completed"
+            ]
+          },
+          "watchedSeconds": {
+            "type": "number"
+          },
+          "qualityUsed": {
+            "type": "string",
+            "nullable": true
+          },
+          "interruptionsCount": {
+            "type": "integer"
+          },
+          "startedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "endedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "PlaybackSessionStartInput": {
+        "type": "object",
+        "required": [
+          "device"
+        ],
+        "properties": {
+          "device": {
+            "type": "string",
+            "enum": [
+              "mobile",
+              "desktop",
+              "tv",
+              "tablet"
+            ]
+          },
+          "region": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "PlaybackSessionUpdateInput": {
+        "type": "object",
+        "properties": {
+          "watchedSeconds": {
+            "type": "number"
+          },
+          "qualityUsed": {
+            "type": "string",
+            "nullable": true
+          },
+          "interruptionsCount": {
+            "type": "integer"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "in_progress",
+              "completed"
+            ]
+          }
+        }
+      },
+      "LiveStream": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "creatorId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "configured",
+              "live",
+              "paused",
+              "ended"
+            ]
+          },
+          "ingestUrl": {
+            "type": "string",
+            "format": "uri"
+          },
+          "streamKey": {
+            "type": "string"
+          },
+          "startedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "endedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "recordedVideoAssetId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true,
+            "description": "Se completa luego de llamar a /convert-to-vod."
+          }
+        }
+      },
+      "LiveStreamCreateInput": {
+        "type": "object",
+        "properties": {
+          "scheduledAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "AssetReadyForPublishingEvent": {
+        "type": "object",
+        "description": "Evento emitido cuando un video terminó de procesarse. Consumido por el bounded context de Catálogo editorial y derechos.\n",
+        "properties": {
+          "eventType": {
+            "type": "string",
+            "enum": [
+              "AssetReadyForPublishing"
+            ]
+          },
+          "videoAssetId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "creatorId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "durationSeconds": {
+            "type": "number"
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    }
+  }
+}
