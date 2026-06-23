@@ -1438,6 +1438,58 @@
             "format": "date-time"
           }
         }
+      },
+      "ContentPublishedEvent": {
+        "type": "object",
+        "description": "Evento emitido cuando un ítem de catálogo pasa a estado published. Consumido por Descubrimiento, Monetización y Publicidad (sección 'Dependencias entre contextos' del enunciado).\n",
+        "properties": {
+          "eventType": {
+            "type": "string",
+            "enum": [
+              "ContentPublished"
+            ]
+          },
+          "contentId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "channelId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "category": {
+            "type": "string",
+            "nullable": true
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ContentUnpublishedEvent": {
+        "type": "object",
+        "description": "Evento emitido cuando un ítem deja de estar published (despublicado u oculto, RF-C3). Consumido por Descubrimiento, Monetización y Publicidad.\n",
+        "properties": {
+          "eventType": {
+            "type": "string",
+            "enum": [
+              "ContentUnpublished"
+            ]
+          },
+          "contentId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "channelId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
       }
     }
   }
