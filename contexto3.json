@@ -1062,41 +1062,26 @@
         "required": [
           "catalogItemId",
           "channelId",
-          "title",
           "publishedAt"
         ],
         "properties": {
           "catalogItemId": {
-            "type": "string"
+            "type": "string",
+            "format": "uuid",
+            "description": "Recibido como contentId en el evento ContentPublished de Catálogo"
           },
           "channelId": {
-            "type": "string"
-          },
-          "title": {
-            "type": "string"
-          },
-          "description": {
-            "type": "string"
-          },
-          "tags": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "categoryId": {
-            "type": "string"
-          },
-          "durationSeconds": {
-            "type": "integer"
-          },
-          "region": {
             "type": "string",
-            "description": "Región de disponibilidad"
+            "format": "uuid"
+          },
+          "category": {
+            "type": "string",
+            "nullable": true
           },
           "publishedAt": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "description": "Recibido como occurredAt en el evento ContentPublished de Catálogo"
           }
         }
       },
