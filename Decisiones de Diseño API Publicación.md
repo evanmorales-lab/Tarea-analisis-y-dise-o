@@ -36,3 +36,6 @@ La URL es "/videoassets/{id}/playbacksessions", una sesión de reproducción no 
 
 Decisión 9: GET/livestream/{id} agregado de manera independiente.
 Ningún requisito nos pide que podamos consultar el estado de un live, lo agregamos porque si  no estuviera no habría forma de saber si podemos pausar o finalizar, o de mostrar algo como el tiempo en vivo o esas cosas, entendemos que es necesario agregar este endpoint.
+
+Decisión 10: Convertir live o VOD es una acción que debe hacer el creador, no se hace de forma automática (mi decisión fav).
+RF P4 nos dice que el sistema debe poder generar una versión grabada, se puede comparar con RF P2 que nos dice que se debe iniciar el procesamiento automático, como en RF P4 no se dice explícito que debe poder, lo interpretamos como que es una decisión que se puede tomar, por eso en el diseño aparece POST/livestream/{id}/converttovod" para que el creador decida si crear una versión grabada, la capacidad del live de ser un video está, es decisión del creador si hace uso de ella.
