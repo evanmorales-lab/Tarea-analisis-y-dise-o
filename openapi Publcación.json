@@ -1063,6 +1063,38 @@
             "format": "date-time"
           }
         }
+      },
+      "PlaybackSessionCompletedEvent": {
+        "type": "object",
+        "description": "Evento emitido cuando una sesión de reproducción finaliza. Consumido por el bounded context de Descubrimiento y personalización (señales de watch-time).\n",
+        "properties": {
+          "eventType": {
+            "type": "string",
+            "enum": [
+              "PlaybackSessionCompleted"
+            ]
+          },
+          "videoAssetId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "viewerId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "watchedSeconds": {
+            "type": "number"
+          },
+          "qualityUsed": {
+            "type": "string",
+            "nullable": true
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
       }
     }
   }
