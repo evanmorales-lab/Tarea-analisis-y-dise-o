@@ -309,7 +309,8 @@
             "required": true,
             "description": "ID del ítem de catálogo de referencia",
             "schema": {
-              "type": "string"
+              "type": "string",
+              "format": "uuid"
             }
           },
           {
@@ -561,7 +562,8 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string"
+              "type": "string",
+              "format": "uuid"
             }
           }
         ],
@@ -645,7 +647,8 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string"
+              "type": "string",
+              "format": "uuid"
             }
           }
         ],
@@ -681,7 +684,8 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string"
+              "type": "string",
+              "format": "uuid"
             }
           }
         ],
@@ -775,7 +779,8 @@
             "format": "uri"
           },
           "channelId": {
-            "type": "string"
+            "type": "string",
+            "format": "uuid"
           },
           "publishedAt": {
             "type": "string",
@@ -835,10 +840,12 @@
         "properties": {
           "catalogItemId": {
             "type": "string",
-            "description": "Referencia al ítem en el contexto de Catálogo"
+            "description": "Referencia al ítem en el contexto de Catálogo",
+            "format": "uuid"
           },
           "channelId": {
-            "type": "string"
+            "type": "string",
+            "format": "uuid"
           },
           "rankScore": {
             "type": "number"
@@ -861,7 +868,8 @@
         ],
         "properties": {
           "catalogItemId": {
-            "type": "string"
+            "type": "string",
+            "format": "uuid"
           },
           "reason": {
             "type": "string",
@@ -922,13 +930,15 @@
         "properties": {
           "userId": {
             "type": "string",
+            "format": "uuid",
             "description": "Nulo si sesión anónima"
           },
           "sessionId": {
             "type": "string"
           },
           "catalogItemId": {
-            "type": "string"
+            "type": "string",
+            "format": "uuid"
           },
           "impressionToken": {
             "type": "string"
@@ -956,13 +966,15 @@
         ],
         "properties": {
           "userId": {
-            "type": "string"
+            "type": "string",
+            "format": "uuid"
           },
           "sessionId": {
             "type": "string"
           },
           "catalogItemId": {
-            "type": "string"
+            "type": "string",
+            "format": "uuid"
           },
           "impressionToken": {
             "type": "string"
@@ -991,10 +1003,12 @@
         ],
         "properties": {
           "userId": {
-            "type": "string"
+            "type": "string",
+            "format": "uuid"
           },
           "catalogItemId": {
-            "type": "string"
+            "type": "string",
+            "format": "uuid"
           },
           "watchedSeconds": {
             "type": "integer",
@@ -1023,7 +1037,8 @@
         ],
         "properties": {
           "userId": {
-            "type": "string"
+            "type": "string",
+            "format": "uuid"
           },
           "interests": {
             "type": "array",
