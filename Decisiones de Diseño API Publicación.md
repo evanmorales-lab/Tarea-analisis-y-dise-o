@@ -16,3 +16,6 @@ Al tener sólo el campo "status" con dichos valores se elimina ese problema.
 
 Decisión 2: No hay entidades separadas para subida y procesamiento.
 El modelo presenta video, sesión de reproducción y transmisión en vivo, no creamos más entidades aparte para subida ni procesamiento ya que ambas son procesos que le suceden a un video, no son objetos con identidad propia.
+
+Decisión 3: Las calidades tendrán su propio estado.
+Cómo sabemos el video se genera en 360p, 720p, 1080p, cada una tendrá su propio estado independiente, esto nos permite que una calidad pueda fallar sin que las demás se bloqueen, un vídeo puede estar disponible en 720p mientras reintentamos el 1080p, en vez de que el video quede como fallido.
