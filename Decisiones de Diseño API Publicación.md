@@ -33,3 +33,6 @@ Decisión 7: Para las operaciones de cancelar, reintentar, iniciar y pausar usam
 
 Decisión 8: Sesiones de reproducción anidadas bajo el video.
 La URL es "/videoassets/{id}/playbacksessions", una sesión de reproducción no tiene sentido de negocio sin el video al cual se asocia, no se consultan de forma independiente.
+
+Decisión 9: GET/livestream/{id} agregado de manera independiente.
+Ningún requisito nos pide que podamos consultar el estado de un live, lo agregamos porque si  no estuviera no habría forma de saber si podemos pausar o finalizar, o de mostrar algo como el tiempo en vivo o esas cosas, entendemos que es necesario agregar este endpoint.
