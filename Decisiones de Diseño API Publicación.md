@@ -30,3 +30,6 @@ Decisión 6: Un sólo PATCH cubre progreso y finalización de una sesión.
 RF P3 menciona inicio, progreso y finalización como 3 momentos de una sesión de reproducción de un video, el inicio es un POST porque crea un momento nuevo, en el caso del progreso y la finalización comparten el mismo PATCH, para actualizar una sesión existente, crea un tercer endpoint sólo para finalizar hubiera duplicado la lógica sin necesidad en verdad.
 
 Decisión 7: Para las operaciones de cancelar, reintentar, iniciar y pausar usamos "PUT/recurso/{id}/acción" en vez de forzarlas dentro de un HTTP genérico. El REST puro dice que todo debería ser crear/leer/actualizar/borrar, pero en la práctica muchas acciones de negocio no encajan en ese molde."Cancelar una subida" no es lo mismo que "borrar el video". Modelarlo comoacción explícita comunica mejor la intención.
+
+Decisión 8: Sesiones de reproducción anidadas bajo el video.
+La URL es "/videoassets/{id}/playbacksessions", una sesión de reproducción no tiene sentido de negocio sin el video al cual se asocia, no se consultan de forma independiente.
