@@ -26,3 +26,5 @@ RF P1 pide soportar ambas, por esto diseñamos 2 endpoints diferentes: "PUT/vide
 Decisión 5: El modo de subida no se debe declarar por el actor.
 No vamos a pedir que quién sube el video deba especificar que está subiendo el video completo o por partes, el modo se determina por el endpoint que use después, si lo hacemos declarar antes eso nos haría agregar una validación de la subida para que el que suba el video respete la forma en que eligió subirlo, lo cuál sería como agregar algo innecesario según nuestro diseño.
 
+Decisión 6: Un sólo PATCH cubre progreso y finalización de una sesión.
+RF P3 menciona inicio, progreso y finalización como 3 momentos de una sesión de reproducción de un video, el inicio es un POST porque crea un momento nuevo, en el caso del progreso y la finalización comparten el mismo PATCH, para actualizar una sesión existente, crea un tercer endpoint sólo para finalizar hubiera duplicado la lógica sin necesidad en verdad.
