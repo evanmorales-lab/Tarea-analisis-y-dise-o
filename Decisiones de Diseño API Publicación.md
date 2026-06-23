@@ -19,3 +19,6 @@ El modelo presenta video, sesión de reproducción y transmisión en vivo, no cr
 
 Decisión 3: Las calidades tendrán su propio estado.
 Cómo sabemos el video se genera en 360p, 720p, 1080p, cada una tendrá su propio estado independiente, esto nos permite que una calidad pueda fallar sin que las demás se bloqueen, un vídeo puede estar disponible en 720p mientras reintentamos el 1080p, en vez de que el video quede como fallido.
+
+Decisión 4: 2 puertas para subida completa y subida por partes.
+RF P1 pide soportar ambas, por esto diseñamos 2 endpoints diferentes: "Put/videoassets/{id}/content" para el archivo de video completo y "PUT/videoassets/{id}/parts/{n}" para subida por partes, al separar esto evitamos mezclar 2 flujos de datos distintos en una misma puerta, esto es más fácil de entender y de implementar que juntarlos en un endpoint.
