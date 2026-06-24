@@ -1,0 +1,182 @@
+<mxfile host="Electron" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/29.6.6 Chrome/144.0.7559.236 Electron/40.8.4 Safari/537.36" version="29.6.6">
+  <diagram id="gk0qIxMk6qx1KH1AfsEA" name="Página-1">
+    <mxGraphModel dx="1895" dy="1200" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1300" pageHeight="1500" background="#000000" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontStyle=1;fontSize=15;fontColor=#ffffff;" value="Diagrama de Secuencia&#xa;GET /feeds/home — Contexto: Descubrimiento y Personalización" vertex="1">
+          <mxGeometry height="40" width="900" x="200" y="10" as="geometry" />
+        </mxCell>
+        <mxCell id="A1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1f1f1f;strokeColor=#0066cc;fontStyle=1;fontSize=11;fontColor=#ffffff;" value="Usuario" vertex="1">
+          <mxGeometry height="40" width="120" x="40" y="70" as="geometry" />
+        </mxCell>
+        <mxCell id="LL1" edge="1" parent="1" style="endArrow=none;dashed=1;strokeColor=#666666;strokeWidth=1;" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="100" y="110" as="sourcePoint" />
+            <mxPoint x="100" y="1380" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="A2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1f1f1f;strokeColor=#0066cc;fontStyle=1;fontSize=11;fontColor=#ffffff;" value="Descubrimiento&#xa;(HomeFeedService)" vertex="1">
+          <mxGeometry height="40" width="160" x="300" y="70" as="geometry" />
+        </mxCell>
+        <mxCell id="LL2" edge="1" parent="1" style="endArrow=none;dashed=1;strokeColor=#666666;strokeWidth=1;" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="380" y="110" as="sourcePoint" />
+            <mxPoint x="380" y="1380" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="A3" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1f1f1f;strokeColor=#9673a6;fontStyle=1;fontSize=11;fontColor=#ffffff;" value="Perfil de Intereses&#xa;(interno)" vertex="1">
+          <mxGeometry height="40" width="160" x="600" y="70" as="geometry" />
+        </mxCell>
+        <mxCell id="LL3" edge="1" parent="1" style="endArrow=none;dashed=1;strokeColor=#666666;strokeWidth=1;" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="680" y="110" as="sourcePoint" />
+            <mxPoint x="680" y="1380" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="A4" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1f1f1f;strokeColor=#d6b656;fontStyle=1;fontSize=11;fontColor=#ffffff;" value="Índice de Ranking&#xa;(interno)" vertex="1">
+          <mxGeometry height="40" width="160" x="880" y="70" as="geometry" />
+        </mxCell>
+        <mxCell id="LL4" edge="1" parent="1" style="endArrow=none;dashed=1;strokeColor=#666666;strokeWidth=1;" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="960" y="110" as="sourcePoint" />
+            <mxPoint x="960" y="1380" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="A5" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1f1f1f;strokeColor=#82b366;fontStyle=1;fontSize=11;fontColor=#ffffff;" value="Catálogo" vertex="1">
+          <mxGeometry height="40" width="140" x="1140" y="70" as="geometry" />
+        </mxCell>
+        <mxCell id="LL5" edge="1" parent="1" style="endArrow=none;dashed=1;strokeColor=#666666;strokeWidth=1;" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1210" y="110" as="sourcePoint" />
+            <mxPoint x="1210" y="1380" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ACT2" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#333333;strokeColor=#999999;" value="" vertex="1">
+          <mxGeometry height="900" width="20" x="370" y="160" as="geometry" />
+        </mxCell>
+        <mxCell id="ACT3" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#3a2f3f;strokeColor=#9673a6;" value="" vertex="1">
+          <mxGeometry height="70" width="20" x="670" y="260" as="geometry" />
+        </mxCell>
+        <mxCell id="ACT4" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#3f3a26;strokeColor=#d6b656;" value="" vertex="1">
+          <mxGeometry height="90" width="20" x="950" y="380" as="geometry" />
+        </mxCell>
+        <mxCell id="bgbox" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#666666;dashed=1;verticalAlign=top;" value="" vertex="1">
+          <mxGeometry height="90" width="430" x="940" y="120" as="geometry" />
+        </mxCell>
+        <mxCell id="bglabel" parent="1" style="text;html=1;align=left;fontSize=10;fontStyle=2;fontColor=#aaaaaa;" value="Evento asíncrono previo (background)" vertex="1">
+          <mxGeometry height="18" width="350" x="950" y="120" as="geometry" />
+        </mxCell>
+        <mxCell id="M0" edge="1" parent="1" style="endArrow=open;endFill=0;dashed=1;strokeColor=#82b366;html=1;fontSize=10;labelBackgroundColor=none;align=center;fontColor=#ffffff;" value="0: ContentPublishedEvent (contentId, channelId, category)">
+          <mxGeometry relative="1" x="0.04" y="-15" as="geometry">
+            <mxPoint as="offset" />
+            <mxPoint x="1210" y="165" as="sourcePoint" />
+            <mxPoint x="960" y="165" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="M1" edge="1" parent="1" style="endArrow=block;endFill=1;strokeColor=#0066cc;html=1;fontSize=10;labelBackgroundColor=none;align=center;fontColor=#ffffff;" value="1: GET /feeds/home?page=1&amp;pageSize=20">
+          <mxGeometry relative="1" y="10" as="geometry">
+            <mxPoint as="offset" />
+            <mxPoint x="100" y="160" as="sourcePoint" />
+            <mxPoint x="380" y="160" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="N2" parent="1" style="rounded=1;fillColor=#1f1f1f;strokeColor=#666666;fontSize=10;whiteSpace=wrap;html=1;fontColor=#cccccc;fontStyle=2;align=center;" value="2: Verifica token Bearer&#xa;(o usa sessionId si es anónimo)" vertex="1">
+          <mxGeometry height="38" width="280" x="400" y="195" as="geometry" />
+        </mxCell>
+        <mxCell id="M3" edge="1" parent="1" style="endArrow=block;endFill=1;strokeColor=#0066cc;html=1;fontSize=10;labelBackgroundColor=none;align=center;fontColor=#ffffff;" value="3: getUserInterestProfile(userId)">
+          <mxGeometry relative="1" x="-0.0345" y="10" as="geometry">
+            <mxPoint as="offset" />
+            <mxPoint x="390" y="260" as="sourcePoint" />
+            <mxPoint x="680" y="260" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="M4" edge="1" parent="1" style="endArrow=open;endFill=0;dashed=1;strokeColor=#0066cc;html=1;fontSize=10;labelBackgroundColor=none;align=center;fontColor=#ffffff;" value="4: UserInterestProfile {interests: [...]}">
+          <mxGeometry relative="1" x="0.0345" y="-10" as="geometry">
+            <mxPoint as="offset" />
+            <mxPoint x="680" y="330" as="sourcePoint" />
+            <mxPoint x="390" y="330" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="M5" edge="1" parent="1" style="endArrow=block;endFill=1;strokeColor=#0066cc;html=1;fontSize=10;labelBackgroundColor=none;align=center;fontColor=#ffffff;" value="5: queryRankedItems(interests, page, pageSize)">
+          <mxGeometry relative="1" x="0.0175" y="10" as="geometry">
+            <mxPoint as="offset" />
+            <mxPoint x="390" y="380" as="sourcePoint" />
+            <mxPoint x="960" y="380" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="N6" parent="1" style="rounded=1;fillColor=#1f1f1f;strokeColor=#666666;fontSize=10;whiteSpace=wrap;html=1;fontColor=#cccccc;fontStyle=2;align=center;" value="6: Aplica ranking personalizado&#xa;usando rankScore por afinidad" vertex="1">
+          <mxGeometry height="38" width="280" x="780" y="415" as="geometry" />
+        </mxCell>
+        <mxCell id="M7" edge="1" parent="1" style="endArrow=open;endFill=0;dashed=1;strokeColor=#0066cc;html=1;fontSize=10;labelBackgroundColor=none;align=center;fontColor=#ffffff;" value="7: List&lt;FeedItem&gt; (catalogItemId, rankScore, ...)">
+          <mxGeometry relative="1" x="-0.0175" y="-10" as="geometry">
+            <mxPoint as="offset" />
+            <mxPoint x="960" y="470" as="sourcePoint" />
+            <mxPoint x="390" y="470" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="N8" parent="1" style="rounded=1;fillColor=#1f1f1f;strokeColor=#666666;fontSize=10;whiteSpace=wrap;html=1;fontColor=#cccccc;fontStyle=2;align=center;" value="8: Construye FeedResult&#xa;(items + pagination)" vertex="1">
+          <mxGeometry height="38" width="280" x="400" y="505" as="geometry" />
+        </mxCell>
+        <mxCell id="M9" edge="1" parent="1" style="endArrow=open;endFill=0;dashed=1;strokeColor=#0066cc;html=1;fontSize=10;labelBackgroundColor=none;align=center;fontColor=#ffffff;" value="9: 200 OK — FeedResult">
+          <mxGeometry relative="1" y="-10" as="geometry">
+            <mxPoint as="offset" />
+            <mxPoint x="380" y="570" as="sourcePoint" />
+            <mxPoint x="100" y="570" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="optbox" parent="1" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;fillColor=none;strokeColor=#ffffff;strokeWidth=1.2;" value="" vertex="1">
+          <mxGeometry height="430" width="1020" x="60" y="610" as="geometry" />
+        </mxCell>
+        <mxCell id="optlabel" parent="1" style="text;html=1;align=left;fontSize=10;fontStyle=2;fontColor=#ffffff;" value="opt: el usuario ve e interactúa con ítems del feed" vertex="1">
+          <mxGeometry height="20" width="450" x="70" y="612" as="geometry" />
+        </mxCell>
+        <mxCell id="M10" edge="1" parent="1" style="endArrow=block;endFill=1;strokeColor=#0066cc;html=1;fontSize=10;labelBackgroundColor=none;align=center;fontColor=#ffffff;" value="&lt;font style=&quot;font-size: 8px;&quot;&gt;10: POST /signals/impression (catalogItemId, impressionToken, context: home_feed)&lt;/font&gt;">
+          <mxGeometry relative="1" x="0.037" y="10" as="geometry">
+            <mxPoint as="offset" />
+            <mxPoint x="100" y="670" as="sourcePoint" />
+            <mxPoint x="370" y="670" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="M11" edge="1" parent="1" style="endArrow=open;endFill=0;dashed=1;strokeColor=#0066cc;html=1;fontSize=10;labelBackgroundColor=none;align=center;fontColor=#ffffff;" value="11: 204 No Content">
+          <mxGeometry relative="1" x="0.037" y="-10" as="geometry">
+            <mxPoint as="offset" />
+            <mxPoint x="370" y="720" as="sourcePoint" />
+            <mxPoint x="100" y="720" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="M12" edge="1" parent="1" style="endArrow=block;endFill=1;strokeColor=#0066cc;html=1;fontSize=10;labelBackgroundColor=none;align=center;fontColor=#ffffff;" value="12: POST /signals/click (catalogItemId, impressionToken)">
+          <mxGeometry relative="1" x="-0.037" y="10" as="geometry">
+            <mxPoint as="offset" />
+            <mxPoint x="100" y="790" as="sourcePoint" />
+            <mxPoint x="370" y="790" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="M13" edge="1" parent="1" style="endArrow=open;endFill=0;dashed=1;strokeColor=#0066cc;html=1;fontSize=10;labelBackgroundColor=none;align=center;fontColor=#ffffff;" value="13: 204 No Content">
+          <mxGeometry relative="1" x="-0.037" y="-10" as="geometry">
+            <mxPoint as="offset" />
+            <mxPoint x="370" y="840" as="sourcePoint" />
+            <mxPoint x="100" y="840" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="M14" edge="1" parent="1" style="endArrow=block;endFill=1;strokeColor=#0066cc;html=1;fontSize=10;labelBackgroundColor=none;align=center;fontColor=#ffffff;" value="&lt;font style=&quot;font-size: 8px;&quot;&gt;14: POST /signals/watch-time (catalogItemId, watchedSeconds, completionRate)&lt;/font&gt;">
+          <mxGeometry relative="1" x="-0.037" y="10" as="geometry">
+            <mxPoint as="offset" />
+            <mxPoint x="100" y="910" as="sourcePoint" />
+            <mxPoint x="370" y="910" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="N15" parent="1" style="rounded=1;fillColor=#1f1f1f;strokeColor=#666666;fontSize=10;whiteSpace=wrap;html=1;fontColor=#cccccc;fontStyle=2;align=center;" value="15: La señal actualiza el perfil de intereses&#xa;para futuras llamadas a GET /feeds/home" vertex="1">
+          <mxGeometry height="38" width="450" x="400" y="945" as="geometry" />
+        </mxCell>
+        <mxCell id="M16" edge="1" parent="1" style="endArrow=open;endFill=0;dashed=1;strokeColor=#0066cc;html=1;fontSize=10;labelBackgroundColor=none;align=center;fontColor=#ffffff;" value="16: 204 No Content">
+          <mxGeometry relative="1" x="-0.037" y="-10" as="geometry">
+            <mxPoint as="offset" />
+            <mxPoint x="370" y="1000" as="sourcePoint" />
+            <mxPoint x="100" y="1000" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

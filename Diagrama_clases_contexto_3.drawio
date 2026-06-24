@@ -1,0 +1,158 @@
+<mxfile host="Electron" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/29.6.6 Chrome/144.0.7559.236 Electron/40.8.4 Safari/537.36" version="29.6.6">
+  <diagram name="Clases - GET feeds-home" id="diag-clases-feeds">
+    <mxGraphModel dx="992" dy="629" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="826" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" parent="1" style="text;html=1;align=center;verticalAlign=middle;fontSize=16;fontStyle=1;" value="Diagrama de Clases &#xa;GET /feeds/home — Contexto: Descubrimiento y Personalización" vertex="1">
+          <mxGeometry height="40" width="600" x="280" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="8twHJD5PIUBQLONkFHig-5" edge="1" parent="1" source="feedresult" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.75;exitDx=0;exitDy=0;entryX=0;entryY=0.75;entryDx=0;entryDy=0;endArrow=diamondThin;endFill=1;" target="pagination">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="8twHJD5PIUBQLONkFHig-6" connectable="0" parent="8twHJD5PIUBQLONkFHig-5" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="1" vertex="1">
+          <mxGeometry relative="1" x="-0.6162" y="-2" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="8twHJD5PIUBQLONkFHig-7" connectable="0" parent="8twHJD5PIUBQLONkFHig-5" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="1" vertex="1">
+          <mxGeometry relative="1" x="0.6294" y="-1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="8twHJD5PIUBQLONkFHig-8" edge="1" parent="1" source="feedresult" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;endArrow=diamondThin;endFill=1;" target="feeditem">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="8twHJD5PIUBQLONkFHig-9" connectable="0" parent="8twHJD5PIUBQLONkFHig-8" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="1" vertex="1">
+          <mxGeometry relative="1" x="-0.6307" y="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="8twHJD5PIUBQLONkFHig-10" connectable="0" parent="8twHJD5PIUBQLONkFHig-8" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="*" vertex="1">
+          <mxGeometry relative="1" x="0.479" y="-1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="feedresult" parent="1" style="swimlane;fontSize=14;fontStyle=1;startSize=30;" value="FeedResult" vertex="1">
+          <mxGeometry height="120" width="240" x="80" y="100" as="geometry" />
+        </mxCell>
+        <mxCell id="feedresult_items" parent="feedresult" style="text;html=1;align=left;fontSize=12;" value="+ items: FeedItem[]" vertex="1">
+          <mxGeometry height="20" width="220" x="10" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="feedresult_pag" parent="feedresult" style="text;html=1;align=left;fontSize=12;" value="+ pagination: Pagination" vertex="1">
+          <mxGeometry height="20" width="220" x="10" y="55" as="geometry" />
+        </mxCell>
+        <mxCell id="feeditem" parent="1" style="swimlane;fontSize=14;fontStyle=1;startSize=30;" value="FeedItem" vertex="1">
+          <mxGeometry height="180" width="280" x="420" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="feeditem_id" parent="feeditem" style="text;html=1;align=left;fontSize=12;" value="+ catalogItemId: string (uuid)" vertex="1">
+          <mxGeometry height="20" width="260" x="10" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="feeditem_channel" parent="feeditem" style="text;html=1;align=left;fontSize=12;" value="+ channelId: string (uuid)" vertex="1">
+          <mxGeometry height="20" width="260" x="10" y="55" as="geometry" />
+        </mxCell>
+        <mxCell id="feeditem_score" parent="feeditem" style="text;html=1;align=left;fontSize=12;" value="+ rankScore: number" vertex="1">
+          <mxGeometry height="20" width="260" x="10" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="feeditem_reason" parent="feeditem" style="text;html=1;align=left;fontSize=12;" value="+ reason: string" vertex="1">
+          <mxGeometry height="20" width="260" x="10" y="105" as="geometry" />
+        </mxCell>
+        <mxCell id="feeditem_token" parent="feeditem" style="text;html=1;align=left;fontSize=12;" value="+ impressionToken: string" vertex="1">
+          <mxGeometry height="20" width="260" x="10" y="130" as="geometry" />
+        </mxCell>
+        <mxCell id="pagination" parent="1" style="swimlane;fontSize=14;fontStyle=1;startSize=30;" value="Pagination" vertex="1">
+          <mxGeometry height="140" width="240" x="80" y="280" as="geometry" />
+        </mxCell>
+        <mxCell id="pag_page" parent="pagination" style="text;html=1;align=left;fontSize=12;" value="+ page: integer" vertex="1">
+          <mxGeometry height="20" width="220" x="10" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="pag_size" parent="pagination" style="text;html=1;align=left;fontSize=12;" value="+ pageSize: integer" vertex="1">
+          <mxGeometry height="20" width="220" x="10" y="55" as="geometry" />
+        </mxCell>
+        <mxCell id="pag_total" parent="pagination" style="text;html=1;align=left;fontSize=12;" value="+ totalItems: integer" vertex="1">
+          <mxGeometry height="20" width="220" x="10" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="pag_pages" parent="pagination" style="text;html=1;align=left;fontSize=12;" value="+ totalPages: integer" vertex="1">
+          <mxGeometry height="20" width="220" x="10" y="105" as="geometry" />
+        </mxCell>
+        <mxCell id="8twHJD5PIUBQLONkFHig-12" edge="1" parent="1" source="uip" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;endArrow=diamondThin;endFill=1;" target="ientry">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="8twHJD5PIUBQLONkFHig-13" connectable="0" parent="8twHJD5PIUBQLONkFHig-12" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="1" vertex="1">
+          <mxGeometry relative="1" x="-0.563" y="2" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="8twHJD5PIUBQLONkFHig-14" connectable="0" parent="8twHJD5PIUBQLONkFHig-12" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="*" vertex="1">
+          <mxGeometry relative="1" x="0.4508" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="uip" parent="1" style="swimlane;fontSize=14;fontStyle=1;startSize=30;" value="UserInterestProfile" vertex="1">
+          <mxGeometry height="140" width="280" x="780" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="uip_user" parent="uip" style="text;html=1;align=left;fontSize=12;" value="+ userId: string (uuid)" vertex="1">
+          <mxGeometry height="20" width="260" x="10" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="uip_interests" parent="uip" style="text;html=1;align=left;fontSize=12;" value="+ interests: InterestEntry[]" vertex="1">
+          <mxGeometry height="20" width="260" x="10" y="55" as="geometry" />
+        </mxCell>
+        <mxCell id="uip_updated" parent="uip" style="text;html=1;align=left;fontSize=12;" value="+ updatedAt: date-time" vertex="1">
+          <mxGeometry height="20" width="260" x="10" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="uip_method" parent="uip" style="text;html=1;align=left;fontSize=12;fontStyle=2;" value="+ getProfile(userId): UserInterestProfile" vertex="1">
+          <mxGeometry height="20" width="260" x="10" y="105" as="geometry" />
+        </mxCell>
+        <mxCell id="ientry" parent="1" style="swimlane;fontSize=14;fontStyle=1;startSize=30;" value="InterestEntry" vertex="1">
+          <mxGeometry height="120" width="280" x="780" y="280" as="geometry" />
+        </mxCell>
+        <mxCell id="ientry_cat" parent="ientry" style="text;html=1;align=left;fontSize=12;" value="+ categoryId: string" vertex="1">
+          <mxGeometry height="20" width="260" x="10" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="ientry_name" parent="ientry" style="text;html=1;align=left;fontSize=12;" value="+ categoryName: string" vertex="1">
+          <mxGeometry height="20" width="260" x="10" y="55" as="geometry" />
+        </mxCell>
+        <mxCell id="ientry_score" parent="ientry" style="text;html=1;align=left;fontSize=12;" value="+ score: float (0.0–1.0)" vertex="1">
+          <mxGeometry height="20" width="260" x="10" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="8twHJD5PIUBQLONkFHig-11" edge="1" parent="1" source="service" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.75;entryDx=0;entryDy=0;" target="feedresult">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="BmYEjYPG3oGRYocZo5Ml-1" connectable="0" parent="8twHJD5PIUBQLONkFHig-11" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="1" vertex="1">
+          <mxGeometry relative="1" x="0.7361" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="BmYEjYPG3oGRYocZo5Ml-2" connectable="0" parent="8twHJD5PIUBQLONkFHig-11" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="*" vertex="1">
+          <mxGeometry relative="1" x="-0.8762" y="-2" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="service" parent="1" style="swimlane;fontSize=14;fontStyle=1;startSize=30;" value="HomeFeedService" vertex="1">
+          <mxGeometry height="100" width="330" x="420" y="320" as="geometry" />
+        </mxCell>
+        <mxCell id="service_method" parent="service" style="text;html=1;align=left;fontSize=12;fontStyle=2;" value="+ getHomeFeed(page, pageSize, sessionId?): FeedResult" vertex="1">
+          <mxGeometry height="40" width="260" x="10" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="e4" edge="1" parent="1" source="service" style="rounded=0;html=1;dashed=1;endArrow=open;startArrow=none;endFill=1;" target="uip">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="BmYEjYPG3oGRYocZo5Ml-3" connectable="0" parent="e4" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="1" vertex="1">
+          <mxGeometry relative="1" x="-0.6894" y="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="BmYEjYPG3oGRYocZo5Ml-4" connectable="0" parent="e4" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="1" vertex="1">
+          <mxGeometry relative="1" x="0.7024" y="3" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="note" parent="1" style="text;html=1;align=left;fontSize=11;fontStyle=2;" value="Nota: catalogItemId y channelId son referencias opacas&#xa;al contexto de Catálogo (no se redefine su estructura interna)." vertex="1">
+          <mxGeometry height="40" width="420" x="420" y="460" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
