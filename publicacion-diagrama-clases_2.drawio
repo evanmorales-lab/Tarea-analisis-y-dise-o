@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxGraphModel dx="1422" dy="762" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <mxCell id="2" value="Diagrama de Clases — POST /live-streams/{id}/convert-to-vod" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontStyle=1;fontSize=13;" vertex="1" parent="1">
+      <mxGeometry x="60" y="12" width="840" height="28" as="geometry"/>
+    </mxCell>
+    <mxCell id="3" value="Endpoint analizado:&lt;br/&gt;&lt;b&gt;POST /live-streams/{id}/convert-to-vod&lt;/b&gt;&lt;br/&gt;&lt;br/&gt;Genera un video on-demand (VOD) a partir de una transmisión en vivo finalizada. El live debe estar en estado &lt;b&gt;ended&lt;/b&gt; para poder llamar a este endpoint." style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=10;align=left;verticalAlign=top;spacingLeft=8;spacingRight=6;" vertex="1" parent="1">
+      <mxGeometry x="800" y="55" width="280" height="120" as="geometry"/>
+    </mxCell>
+    <mxCell id="4" value="&lt;b&gt;Decisión de diseño (Decisión 10):&lt;/b&gt;&lt;br/&gt;Esta acción es &lt;b&gt;explícita&lt;/b&gt;, no automática. El enunciado usa &quot;debe &lt;i&gt;poder&lt;/i&gt; generar&quot;, no &quot;debe generar automáticamente&quot; — el creador decide si convierte el live a VOD, el sistema no lo hace solo." style="shape=note;whiteSpace=wrap;html=1;backgroundOutline=1;size=15;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;align=left;verticalAlign=top;spacingLeft=8;" vertex="1" parent="1">
+      <mxGeometry x="800" y="195" width="280" height="130" as="geometry"/>
+    </mxCell>
+    <mxCell id="LEG" value="Leyenda" style="swimlane;fontStyle=1;align=center;startSize=20;fillColor=#f5f5f5;strokeColor=#666666;rounded=1;" vertex="1" parent="1">
+      <mxGeometry x="800" y="350" width="280" height="92" as="geometry"/>
+    </mxCell>
+    <mxCell id="LEG_0" value="Azul: clase principal del flujo" style="text;align=left;spacingLeft=6;rounded=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="LEG">
+      <mxGeometry y="20" width="280" height="24" as="geometry"/>
+    </mxCell>
+    <mxCell id="LEG_1" value="Amarillo: lista de estados posibles" style="text;align=left;spacingLeft=6;rounded=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="LEG">
+      <mxGeometry y="44" width="280" height="24" as="geometry"/>
+    </mxCell>
+    <mxCell id="LEG_2" value="Negrita: campo clave en este flujo" style="text;align=left;spacingLeft=6;rounded=1;fillColor=#f5f5f5;strokeColor=none;" vertex="1" parent="LEG">
+      <mxGeometry y="68" width="280" height="24" as="geometry"/>
+    </mxCell>
+    <mxCell id="10" value="LiveStream" style="swimlane;fontStyle=1;align=center;startSize=26;fillColor=#dae8fc;strokeColor=#6c8ebf;rounded=1;" vertex="1" parent="1">
+      <mxGeometry x="60" y="55" width="270" height="218" as="geometry"/>
+    </mxCell>
+    <mxCell id="LS0" value="id : UUID" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=8;overflow=hidden;" vertex="1" parent="10">
+      <mxGeometry y="26" width="270" height="24" as="geometry"/>
+    </mxCell>
+    <mxCell id="LS1" value="creatorId : UUID" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=8;overflow=hidden;" vertex="1" parent="10">
+      <mxGeometry y="50" width="270" height="24" as="geometry"/>
+    </mxCell>
+    <mxCell id="LS2" value="status : LiveStreamStatus" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=8;overflow=hidden;fontStyle=1;" vertex="1" parent="10">
+      <mxGeometry y="74" width="270" height="24" as="geometry"/>
+    </mxCell>
+    <mxCell id="LS3" value="ingestUrl : string" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=8;overflow=hidden;" vertex="1" parent="10">
+      <mxGeometry y="98" width="270" height="24" as="geometry"/>
+    </mxCell>
+    <mxCell id="LS4" value="streamKey : string" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=8;overflow=hidden;" vertex="1" parent="10">
+      <mxGeometry y="122" width="270" height="24" as="geometry"/>
+    </mxCell>
+    <mxCell id="LS5" value="startedAt : DateTime" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=8;overflow=hidden;" vertex="1" parent="10">
+      <mxGeometry y="146" width="270" height="24" as="geometry"/>
+    </mxCell>
+    <mxCell id="LS6" value="endedAt : DateTime" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=8;overflow=hidden;" vertex="1" parent="10">
+      <mxGeometry y="170" width="270" height="24" as="geometry"/>
+    </mxCell>
+    <mxCell id="LS7" value="recordedVideoAssetId : UUID" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=8;overflow=hidden;fontStyle=1;" vertex="1" parent="10">
+      <mxGeometry y="194" width="270" height="24" as="geometry"/>
+    </mxCell>
+    <mxCell id="20" value="VideoAsset" style="swimlane;fontStyle=1;align=center;startSize=26;fillColor=#dae8fc;strokeColor=#6c8ebf;rounded=1;" vertex="1" parent="1">
+      <mxGeometry x="440" y="55" width="265" height="194" as="geometry"/>
+    </mxCell>
+    <mxCell id="20n" value="video on-demand generado por el live" style="text;strokeColor=none;fillColor=none;align=center;fontSize=9;fontStyle=2;" vertex="1" parent="1">
+      <mxGeometry x="440" y="249" width="265" height="16" as="geometry"/>
+    </mxCell>
+    <mxCell id="VA0" value="id : UUID" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=8;overflow=hidden;fontStyle=1;" vertex="1" parent="20">
+      <mxGeometry y="26" width="265" height="24" as="geometry"/>
+    </mxCell>
+    <mxCell id="VA1" value="creatorId : UUID" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=8;overflow=hidden;" vertex="1" parent="20">
+      <mxGeometry y="50" width="265" height="24" as="geometry"/>
+    </mxCell>
+    <mxCell id="VA2" value="status : VideoAssetStatus" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=8;overflow=hidden;fontStyle=1;" vertex="1" parent="20">
+      <mxGeometry y="74" width="265" height="24" as="geometry"/>
+    </mxCell>
+    <mxCell id="VA3" value="durationSeconds : number" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=8;overflow=hidden;" vertex="1" parent="20">
+      <mxGeometry y="98" width="265" height="24" as="geometry"/>
+    </mxCell>
+    <mxCell id="VA4" value="renditions : Rendition[ ]" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=8;overflow=hidden;" vertex="1" parent="20">
+      <mxGeometry y="122" width="265" height="24" as="geometry"/>
+    </mxCell>
+    <mxCell id="VA5" value="createdAt : DateTime" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=8;overflow=hidden;" vertex="1" parent="20">
+      <mxGeometry y="146" width="265" height="24" as="geometry"/>
+    </mxCell>
+    <mxCell id="VA6" value="updatedAt : DateTime" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=8;overflow=hidden;" vertex="1" parent="20">
+      <mxGeometry y="170" width="265" height="24" as="geometry"/>
+    </mxCell>
+    <mxCell id="30" value="&lt;&lt;enumeration&gt;&gt;&#xa;LiveStreamStatus" style="swimlane;fontStyle=1;align=center;startSize=40;fillColor=#fff2cc;strokeColor=#d6b656;rounded=1;" vertex="1" parent="1">
+      <mxGeometry x="60" y="303" width="270" height="136" as="geometry"/>
+    </mxCell>
+    <mxCell id="LSS0" value="configured" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=8;overflow=hidden;" vertex="1" parent="30">
+      <mxGeometry y="40" width="270" height="24" as="geometry"/>
+    </mxCell>
+    <mxCell id="LSS1" value="live" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=8;overflow=hidden;" vertex="1" parent="30">
+      <mxGeometry y="64" width="270" height="24" as="geometry"/>
+    </mxCell>
+    <mxCell id="LSS2" value="paused" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=8;overflow=hidden;" vertex="1" parent="30">
+      <mxGeometry y="88" width="270" height="24" as="geometry"/>
+    </mxCell>
+    <mxCell id="LSS3" value="ended   ←  requerido para este endpoint" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=8;overflow=hidden;fontStyle=1;" vertex="1" parent="30">
+      <mxGeometry y="112" width="270" height="24" as="geometry"/>
+    </mxCell>
+    <mxCell id="40" value="&lt;&lt;enumeration&gt;&gt;&#xa;VideoAssetStatus" style="swimlane;fontStyle=1;align=center;startSize=40;fillColor=#fff2cc;strokeColor=#d6b656;rounded=1;" vertex="1" parent="1">
+      <mxGeometry x="440" y="279" width="265" height="136" as="geometry"/>
+    </mxCell>
+    <mxCell id="VAS0" value="pending   ←  estado inicial del VOD" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=8;overflow=hidden;fontStyle=1;" vertex="1" parent="40">
+      <mxGeometry y="40" width="265" height="24" as="geometry"/>
+    </mxCell>
+    <mxCell id="VAS1" value="processing" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=8;overflow=hidden;" vertex="1" parent="40">
+      <mxGeometry y="64" width="265" height="24" as="geometry"/>
+    </mxCell>
+    <mxCell id="VAS2" value="ready" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=8;overflow=hidden;" vertex="1" parent="40">
+      <mxGeometry y="88" width="265" height="24" as="geometry"/>
+    </mxCell>
+    <mxCell id="VAS3" value="failed" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=8;overflow=hidden;" vertex="1" parent="40">
+      <mxGeometry y="112" width="265" height="24" as="geometry"/>
+    </mxCell>
+    <mxCell id="R1" value="genera VOD&#xa;(0..1)" style="endArrow=open;endFill=0;dashed=1;dashPattern=5 5;fontSize=10;labelBackgroundColor=none;" edge="1" source="10" target="20" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="R2" value="usa" style="endArrow=open;endFill=0;dashed=1;dashPattern=5 5;fontSize=10;labelBackgroundColor=none;" edge="1" source="10" target="30" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="R3" value="usa" style="endArrow=open;endFill=0;dashed=1;dashPattern=5 5;fontSize=10;labelBackgroundColor=none;" edge="1" source="20" target="40" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+  </root>
+</mxGraphModel>
