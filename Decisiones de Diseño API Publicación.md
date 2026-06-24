@@ -39,3 +39,10 @@ Ningún requisito nos pide que podamos consultar el estado de un live, lo agrega
 
 Decisión 10: Convertir live o VOD es una acción que debe hacer el creador, no se hace de forma automática (mi decisión fav).
 RF P4 nos dice que el sistema debe poder generar una versión grabada, se puede comparar con RF P2 que nos dice que se debe iniciar el procesamiento automático, como en RF P4 no se dice explícito que debe poder, lo interpretamos como que es una decisión que se puede tomar, por eso en el diseño aparece POST/livestream/{id}/converttovod" para que el creador decida si crear una versión grabada, la capacidad del live de ser un video está, es decisión del creador si hace uso de ella.
+
+Decisión 11 a 15: 
+Estas decisiones nacen de los requisitos no funcionales RNF, la primera de ellas es la paginación simple (11), usamos los parámetros page y pagesize en la URL.
+Del RNF3 definimos que los errores de esta API se vean igual, un campo code con un identificador y un campo message con texto legible (12).
+Del RNF1 en las descripciones de cada endpoint dejamos documentado que rol necesita creator o viewer para poder usarlo (13).
+El creatorID viene del token, no del body (14).
+Eventos documentados como schemas (15).
