@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxGraphModel dx="1422" dy="762" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <mxCell id="2" value="Diagrama de Secuencia — GET /content/{id}/visibility?country=CL&amp;age=25" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontStyle=1;fontSize=13;" vertex="1" parent="1">
+      <mxGeometry x="60" y="10" width="900" height="28" as="geometry"/>
+    </mxCell>
+    <mxCell id="QA" value="App / Espectador" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="40" y="55" width="130" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="LLQA" value="" style="endArrow=none;dashed=1;strokeColor=#aaaaaa;strokeWidth=1;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="105" y="95" as="sourcePoint"/>
+        <mxPoint x="105" y="660" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="QB" value="API Catálogo" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="220" y="55" width="160" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="LLQB" value="" style="endArrow=none;dashed=1;strokeColor=#aaaaaa;strokeWidth=1;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="300" y="95" as="sourcePoint"/>
+        <mxPoint x="300" y="660" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="QC" value="ContenidoEditorial" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="450" y="55" width="170" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="LLQC" value="" style="endArrow=none;dashed=1;strokeColor=#aaaaaa;strokeWidth=1;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="535" y="95" as="sourcePoint"/>
+        <mxPoint x="535" y="660" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="QD" value="Restricciones&#xa;(registros activos)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="700" y="55" width="170" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="LLQD" value="" style="endArrow=none;dashed=1;strokeColor=#aaaaaa;strokeWidth=1;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="785" y="95" as="sourcePoint"/>
+        <mxPoint x="785" y="660" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="DN1" value="&lt;b&gt;Decisión 15:&lt;/b&gt; country y age los aporta quien llama. Catálogo no busca el perfil del espectador — la identidad es una plataforma compartida fuera de este contexto." style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=10;align=left;verticalAlign=top;spacingLeft=8;spacingRight=6;fontSize=10;verticalAlign=top;" vertex="1" parent="1">
+      <mxGeometry x="910" y="55" width="240" height="90" as="geometry"/>
+    </mxCell>
+    <mxCell id="QM1" value="GET /content/{id}/visibility?country=CL&amp;age=25" style="endArrow=block;endFill=1;strokeColor=#23445d;html=1;fontSize=10;labelBackgroundColor=none;align=center;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="105" y="130" as="sourcePoint"/>
+        <mxPoint x="300" y="130" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="QM2" value="Consulta estado del contenido (id)" style="endArrow=block;endFill=1;strokeColor=#23445d;html=1;fontSize=10;labelBackgroundColor=none;align=center;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="300" y="175" as="sourcePoint"/>
+        <mxPoint x="535" y="175" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="QM3" value="status: published / draft / unpublished" style="endArrow=open;endFill=0;dashed=1;strokeColor=#23445d;html=1;fontSize=10;labelBackgroundColor=none;align=center;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="535" y="210" as="sourcePoint"/>
+        <mxPoint x="300" y="210" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="ERR" value="Si status ≠ published:&#xa;responde { visible: false, reason: &quot;Contenido no publicado&quot; }&#xa;sin revisar restricciones" style="rounded=1;fillColor=#fce4e4;strokeColor=#cc0000;fontSize=10;whiteSpace=wrap;html=1;align=left;spacingLeft=6;fontColor=#cc0000;" vertex="1" parent="1">
+      <mxGeometry x="310" y="225" width="250" height="48" as="geometry"/>
+    </mxCell>
+    <mxCell id="DN2" value="&lt;b&gt;Decisión 2:&lt;/b&gt; las restricciones se evalúan acá, separadas del campo status. Un contenido puede ser published y tener restricciones activas al mismo tiempo." style="shape=note;whiteSpace=wrap;html=1;backgroundOutline=1;size=15;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;align=left;verticalAlign=top;spacingLeft=8;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="910" y="165" width="240" height="90" as="geometry"/>
+    </mxCell>
+    <mxCell id="QM4" value="Consulta restricciones sin liftedAt&#xa;(= restricciones activas ahora)" style="endArrow=block;endFill=1;strokeColor=#23445d;html=1;fontSize=10;labelBackgroundColor=none;align=center;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="300" y="295" as="sourcePoint"/>
+        <mxPoint x="785" y="295" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="QM5" value="Lista de restricciones activas" style="endArrow=open;endFill=0;dashed=1;strokeColor=#23445d;html=1;fontSize=10;labelBackgroundColor=none;align=center;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="785" y="335" as="sourcePoint"/>
+        <mxPoint x="300" y="335" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="IT1" value="Evalúa geo_block&#xa;para country = CL" style="rounded=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=10;whiteSpace=wrap;html=1;fontColor=#555555;fontStyle=2;align=center;" vertex="1" parent="1">
+      <mxGeometry x="230" y="355" width="140" height="34" as="geometry"/>
+    </mxCell>
+    <mxCell id="IT2" value="Evalúa minimum_age&#xa;para age = 25" style="rounded=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=10;whiteSpace=wrap;html=1;fontColor=#555555;fontStyle=2;align=center;" vertex="1" parent="1">
+      <mxGeometry x="230" y="395" width="140" height="34" as="geometry"/>
+    </mxCell>
+    <mxCell id="QM6" value="{ visible: true / false, reason: &quot;...&quot; }" style="endArrow=open;endFill=0;dashed=1;strokeColor=#23445d;html=1;fontSize=10;labelBackgroundColor=none;align=center;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="300" y="450" as="sourcePoint"/>
+        <mxPoint x="105" y="450" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="DNF" value="El resultado depende de: (1) que el contenido esté published, (2) que no haya un geo_block activo para ese country, y (3) que la edad supere el minimum_age si aplica." style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=10;align=left;verticalAlign=top;spacingLeft=8;spacingRight=6;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="40" y="570" width="500" height="46" as="geometry"/>
+    </mxCell>
+  </root>
+</mxGraphModel>
