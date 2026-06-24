@@ -1,0 +1,122 @@
+<mxfile host="app.diagrams.net">
+  <diagram id="afwNpCzc4BvNBt6t3o0g" name="Página-1">
+    <mxGraphModel dx="975" dy="541" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="titulo" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontStyle=1;fontSize=13;" value="Diagrama de Secuencia — POST /impressions (Contexto 6 - Publicidad)" vertex="1">
+          <mxGeometry height="28" width="850" x="60" y="10" as="geometry" />
+        </mxCell>
+        <mxCell id="PC" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#000000;strokeColor=#000000;fontColor=#ffffff;fontStyle=1;fontSize=11;" value="Cliente" vertex="1">
+          <mxGeometry height="40" width="120" x="40" y="55" as="geometry" />
+        </mxCell>
+        <mxCell id="LLPC" edge="1" parent="1" style="endArrow=none;dashed=1;strokeColor=#000000;strokeWidth=1;" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="100" y="95" as="sourcePoint" />
+            <mxPoint x="100" y="620" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="PA" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#000000;strokeColor=#000000;fontColor=#ffffff;fontStyle=1;fontSize=11;" value="API Publicidad" vertex="1">
+          <mxGeometry height="40" width="160" x="220" y="55" as="geometry" />
+        </mxCell>
+        <mxCell id="LLPA" edge="1" parent="1" source="MsVTTLI7o7PX2ojdsgMm-7" style="endArrow=none;dashed=1;strokeColor=#000000;strokeWidth=1;" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="300" y="95" as="sourcePoint" />
+            <mxPoint x="300" y="620" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="PCamp" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#000000;strokeColor=#000000;fontColor=#ffffff;fontStyle=1;fontSize=11;" value="Campaign&#xa;(/campaigns/{campaignId}/end)" vertex="1">
+          <mxGeometry height="40" width="175" x="450" y="55" as="geometry" />
+        </mxCell>
+        <mxCell id="LLCamp" edge="1" parent="1" source="MsVTTLI7o7PX2ojdsgMm-5" style="endArrow=none;dashed=1;strokeColor=#000000;strokeWidth=1;" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="537" y="95" as="sourcePoint" />
+            <mxPoint x="537" y="620" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="PEvt" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#000000;strokeColor=#000000;fontColor=#ffffff;fontStyle=1;fontSize=11;" value="Eventos emitidos&#xa;(/integration/emitted-events)" vertex="1">
+          <mxGeometry height="40" width="190" x="700" y="55" as="geometry" />
+        </mxCell>
+        <mxCell id="LLEvt" edge="1" parent="1" style="endArrow=none;dashed=1;strokeColor=#000000;strokeWidth=1;" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="795" y="95" as="sourcePoint" />
+            <mxPoint x="795" y="620" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="M1" edge="1" parent="1" style="endArrow=block;endFill=1;strokeColor=#000000;html=1;fontSize=10;labelBackgroundColor=none;align=center;" value="POST /impressions&#xa;{campaignId, creativeId, videoId, channelId, format, billable}">
+          <mxGeometry relative="1" x="0.3" y="-10" as="geometry">
+            <mxPoint as="offset" />
+            <mxPoint x="100" y="140" as="sourcePoint" />
+            <mxPoint x="300" y="140" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="M2" edge="1" parent="1" style="endArrow=open;endFill=0;dashed=1;strokeColor=#000000;html=1;fontSize=10;labelBackgroundColor=none;align=center;fontStyle=2;" value="400 — Campaña inactiva o presupuesto agotado">
+          <mxGeometry relative="1" x="-0.1" y="15" as="geometry">
+            <mxPoint as="offset" />
+            <mxPoint x="300" y="195" as="sourcePoint" />
+            <mxPoint x="100" y="195" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="NOTE_ERR" parent="1" style="text;html=1;strokeColor=none;fillColor=none;fontSize=9;fontStyle=2;align=left;" value="[Si campaña inactiva o presupuesto agotado]" vertex="1">
+          <mxGeometry height="18" width="240" x="90" y="220" as="geometry" />
+        </mxCell>
+        <mxCell id="M3" edge="1" parent="1" style="endArrow=block;endFill=1;strokeColor=#000000;html=1;fontSize=10;labelBackgroundColor=none;align=center;" value="Suma gasto a la campaña">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="300" y="245" as="sourcePoint" />
+            <mxPoint x="537" y="245" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="NOTE_OK" parent="1" style="text;html=1;strokeColor=none;fillColor=none;fontSize=9;fontStyle=2;align=left;" value="[Si campaña activa y con presupuesto]" vertex="1">
+          <mxGeometry height="18" width="220" x="315" y="220" as="geometry" />
+        </mxCell>
+        <mxCell id="M4" edge="1" parent="1" style="endArrow=block;endFill=1;strokeColor=#000000;html=1;fontSize=10;labelBackgroundColor=none;align=center;fontStyle=2;" value="POST /campaigns/{campaignId}/end&#xa;finaliza la campaña">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="300" y="295" as="sourcePoint" />
+            <mxPoint x="537" y="295" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="NOTE_END" parent="1" style="text;html=1;strokeColor=none;fillColor=none;fontSize=9;fontStyle=2;align=left;" value="[Si el presupuesto se agota]" vertex="1">
+          <mxGeometry height="18" width="200" x="345" y="300" as="geometry" />
+        </mxCell>
+        <mxCell id="M5" edge="1" parent="1" style="endArrow=block;endFill=1;strokeColor=#000000;html=1;fontSize=10;labelBackgroundColor=none;align=center;fontStyle=2;" value="Emite AdRevenueGenerated&#xa;{channelId, videoId, campaignId, billableAmount}">
+          <mxGeometry relative="1" x="0.4545" y="-5" as="geometry">
+            <mxPoint as="offset" />
+            <mxPoint x="300" y="345" as="sourcePoint" />
+            <mxPoint x="795" y="345" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="NOTE_EVT" parent="1" style="rounded=1;fillColor=#f5f5f5;strokeColor=#000000;fontSize=9;whiteSpace=wrap;html=1;fontColor=#000000;fontStyle=2;align=center;" value="[Si es facturable]&#xa;Hacia Contexto 5 - Monetización" vertex="1">
+          <mxGeometry height="34" width="165" x="808" y="328" as="geometry" />
+        </mxCell>
+        <mxCell id="M6" edge="1" parent="1" style="endArrow=open;endFill=0;dashed=1;strokeColor=#000000;html=1;fontSize=10;labelBackgroundColor=none;align=center;" value="201 — Impresión registrada {id, cost, billable, occurredAt}">
+          <mxGeometry relative="1" x="0.7429" y="10" as="geometry">
+            <mxPoint as="offset" />
+            <mxPoint x="800" y="400" as="sourcePoint" />
+            <mxPoint x="100" y="400" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="MsVTTLI7o7PX2ojdsgMm-4" parent="1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" value="" vertex="1">
+          <mxGeometry height="258" width="10" x="95" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="MsVTTLI7o7PX2ojdsgMm-6" edge="1" parent="1" style="endArrow=none;dashed=1;strokeColor=#000000;strokeWidth=1;" target="MsVTTLI7o7PX2ojdsgMm-5" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="537" y="95" as="sourcePoint" />
+            <mxPoint x="537" y="620" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="MsVTTLI7o7PX2ojdsgMm-5" parent="1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" value="" vertex="1">
+          <mxGeometry height="162" width="10" x="535" y="238" as="geometry" />
+        </mxCell>
+        <mxCell id="MsVTTLI7o7PX2ojdsgMm-8" edge="1" parent="1" style="endArrow=none;dashed=1;strokeColor=#000000;strokeWidth=1;" target="MsVTTLI7o7PX2ojdsgMm-7" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="300" y="95" as="sourcePoint" />
+            <mxPoint x="300" y="620" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="MsVTTLI7o7PX2ojdsgMm-7" parent="1" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" value="" vertex="1">
+          <mxGeometry height="260" width="10" x="295" y="140" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
