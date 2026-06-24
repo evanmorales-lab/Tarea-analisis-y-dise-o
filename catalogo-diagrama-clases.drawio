@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxGraphModel dx="1422" dy="762" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <mxCell id="2" value="Diagrama de Clases — GET /content/{id}/visibility" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontStyle=1;fontSize=13;" vertex="1" parent="1">
+      <mxGeometry x="60" y="12" width="840" height="28" as="geometry"/>
+    </mxCell>
+    <mxCell id="3" value="Endpoint analizado:&lt;br/&gt;&lt;b&gt;GET /content/{id}/visibility?country=CL&amp;age=25&lt;/b&gt;&lt;br/&gt;&lt;br/&gt;Consulta si un contenido es visible para un espectador según su país y edad. Evalúa el estado del contenido y sus restricciones activas." style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=10;align=left;verticalAlign=top;spacingLeft=8;spacingRight=6;" vertex="1" parent="1">
+      <mxGeometry x="800" y="55" width="280" height="120" as="geometry"/>
+    </mxCell>
+    <mxCell id="4" value="&lt;b&gt;Decisión 15:&lt;/b&gt; País y edad los aporta &lt;b&gt;quien llama&lt;/b&gt;. Catálogo no busca el perfil del espectador por su cuenta — la identidad del usuario es una plataforma compartida fuera de este contexto (sección 2.2 del enunciado).&lt;br/&gt;&lt;br/&gt;&lt;b&gt;Decisión 2:&lt;/b&gt; Las restricciones se evalúan aparte, no como parte del campo status del contenido." style="shape=note;whiteSpace=wrap;html=1;backgroundOutline=1;size=15;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;align=left;verticalAlign=top;spacingLeft=8;" vertex="1" parent="1">
+      <mxGeometry x="800" y="195" width="280" height="155" as="geometry"/>
+    </mxCell>
+    <mxCell id="LEG" value="Leyenda" style="swimlane;fontStyle=1;align=center;startSize=20;fillColor=#f5f5f5;strokeColor=#666666;rounded=1;" vertex="1" parent="1">
+      <mxGeometry x="800" y="375" width="280" height="140" as="geometry"/>
+    </mxCell>
+    <mxCell id="LEG_0" value="Azul: clase principal del flujo" style="text;align=left;spacingLeft=6;rounded=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="LEG">
+      <mxGeometry y="20" width="280" height="24" as="geometry"/>
+    </mxCell>
+    <mxCell id="LEG_1" value="Verde: valor interno (sin ID propio)" style="text;align=left;spacingLeft=6;rounded=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="LEG">
+      <mxGeometry y="44" width="280" height="24" as="geometry"/>
+    </mxCell>
+    <mxCell id="LEG_2" value="Morado: objeto de respuesta del endpoint" style="text;align=left;spacingLeft=6;rounded=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="LEG">
+      <mxGeometry y="68" width="280" height="24" as="geometry"/>
+    </mxCell>
+    <mxCell id="LEG_3" value="Amarillo: lista de estados posibles" style="text;align=left;spacingLeft=6;rounded=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="LEG">
+      <mxGeometry y="92" width="280" height="24" as="geometry"/>
+    </mxCell>
+    <mxCell id="LEG_4" value="Negrita: campo clave en este flujo" style="text;align=left;spacingLeft=6;rounded=1;fillColor=#f5f5f5;strokeColor=none;" vertex="1" parent="LEG">
+      <mxGeometry y="116" width="280" height="24" as="geometry"/>
+    </mxCell>
+    <mxCell id="10" value="ContenidoEditorial" style="swimlane;fontStyle=1;align=center;startSize=26;fillColor=#dae8fc;strokeColor=#6c8ebf;rounded=1;" vertex="1" parent="1">
+      <mxGeometry x="60" y="55" width="290" height="290" as="geometry"/>
+    </mxCell>
+    <mxCell id="CE0" value="id : UUID" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=8;overflow=hidden;" vertex="1" parent="10">
+      <mxGeometry y="26" width="290" height="24" as="geometry"/>
+    </mxCell>
+    <mxCell id="CE1" value="videoAssetId : UUID" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=8;overflow=hidden;" vertex="1" parent="10">
+      <mxGeometry y="50" width="290" height="24" as="geometry"/>
+    </mxCell>
+    <mxCell id="CE2" value="channelId : UUID" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=8;overflow=hidden;" vertex="1" parent="10">
+      <mxGeometry y="74" width="290" height="24" as="geometry"/>
+    </mxCell>
+    <mxCell id="CE3" value="título : string" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=8;overflow=hidden;" vertex="1" parent="10">
+      <mxGeometry y="98" width="290" height="24" as="geometry"/>
+    </mxCell>
+    <mxCell id="CE4" value="descripción : string" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=8;overflow=hidden;" vertex="1" parent="10">
+      <mxGeometry y="122" width="290" height="24" as="geometry"/>
+    </mxCell>
+    <mxCell id="CE5" value="tags : string[ ]" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=8;overflow=hidden;" vertex="1" parent="10">
+      <mxGeometry y="146" width="290" height="24" as="geometry"/>
+    </mxCell>
+    <mxCell id="CE6" value="categoría : string" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=8;overflow=hidden;" vertex="1" parent="10">
+      <mxGeometry y="170" width="290" height="24" as="geometry"/>
+    </mxCell>
+    <mxCell id="CE7" value="thumbnailUrl : URL" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=8;overflow=hidden;" vertex="1" parent="10">
+      <mxGeometry y="194" width="290" height="24" as="geometry"/>
+    </mxCell>
+    <mxCell id="CE8" value="status : CatalogItemStatus" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=8;overflow=hidden;fontStyle=1;" vertex="1" parent="10">
+      <mxGeometry y="218" width="290" height="24" as="geometry"/>
+    </mxCell>
+    <mxCell id="CE9" value="createdAt : DateTime" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=8;overflow=hidden;" vertex="1" parent="10">
+      <mxGeometry y="242" width="290" height="24" as="geometry"/>
+    </mxCell>
+    <mxCell id="CE10" value="updatedAt : DateTime" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=8;overflow=hidden;" vertex="1" parent="10">
+      <mxGeometry y="266" width="290" height="24" as="geometry"/>
+    </mxCell>
+    <mxCell id="20" value="Restriccion" style="swimlane;fontStyle=1;align=center;startSize=26;fillColor=#d5e8d4;strokeColor=#82b366;rounded=1;" vertex="1" parent="1">
+      <mxGeometry x="450" y="55" width="240" height="142" as="geometry"/>
+    </mxCell>
+    <mxCell id="20L" value="«valor interno»" style="text;strokeColor=none;fillColor=none;align=center;fontStyle=2;fontSize=10;" vertex="1" parent="20">
+      <mxGeometry y="26" width="240" height="20" as="geometry"/>
+    </mxCell>
+    <mxCell id="RS0" value="tipo : string" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=8;overflow=hidden;fontStyle=1;" vertex="1" parent="20">
+      <mxGeometry y="46" width="240" height="24" as="geometry"/>
+    </mxCell>
+    <mxCell id="RS1" value="detalle : object" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=8;overflow=hidden;fontStyle=1;" vertex="1" parent="20">
+      <mxGeometry y="70" width="240" height="24" as="geometry"/>
+    </mxCell>
+    <mxCell id="RS2" value="appliedAt : DateTime" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=8;overflow=hidden;" vertex="1" parent="20">
+      <mxGeometry y="94" width="240" height="24" as="geometry"/>
+    </mxCell>
+    <mxCell id="RS3" value="liftedAt : DateTime (nullable)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=8;overflow=hidden;" vertex="1" parent="20">
+      <mxGeometry y="118" width="240" height="24" as="geometry"/>
+    </mxCell>
+    <mxCell id="RSN" value="liftedAt = null → restricción activa ahora&#xa;liftedAt = fecha → ya fue levantada (historial)" style="text;strokeColor=none;fillColor=none;fontSize=9;fontStyle=2;align=center;" vertex="1" parent="1">
+      <mxGeometry x="450" y="197" width="240" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="30" value="VisibilityResult" style="swimlane;fontStyle=1;align=center;startSize=26;fillColor=#e1d5e7;strokeColor=#9673a6;rounded=1;" vertex="1" parent="1">
+      <mxGeometry x="450" y="247" width="240" height="94" as="geometry"/>
+    </mxCell>
+    <mxCell id="30L" value="«respuesta del endpoint»" style="text;strokeColor=none;fillColor=none;align=center;fontStyle=2;fontSize=10;" vertex="1" parent="30">
+      <mxGeometry y="26" width="240" height="20" as="geometry"/>
+    </mxCell>
+    <mxCell id="VR0" value="visible : boolean" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=8;overflow=hidden;fontStyle=1;" vertex="1" parent="30">
+      <mxGeometry y="46" width="240" height="24" as="geometry"/>
+    </mxCell>
+    <mxCell id="VR1" value="reason : string (nullable)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=8;overflow=hidden;" vertex="1" parent="30">
+      <mxGeometry y="70" width="240" height="24" as="geometry"/>
+    </mxCell>
+    <mxCell id="40" value="&lt;&lt;enumeration&gt;&gt;&#xa;CatalogItemStatus" style="swimlane;fontStyle=1;align=center;startSize=40;fillColor=#fff2cc;strokeColor=#d6b656;rounded=1;" vertex="1" parent="1">
+      <mxGeometry x="60" y="375" width="290" height="112" as="geometry"/>
+    </mxCell>
+    <mxCell id="CIS0" value="draft" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=8;overflow=hidden;" vertex="1" parent="40">
+      <mxGeometry y="40" width="290" height="24" as="geometry"/>
+    </mxCell>
+    <mxCell id="CIS1" value="published   ←  necesario para visible=true" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=8;overflow=hidden;fontStyle=1;" vertex="1" parent="40">
+      <mxGeometry y="64" width="290" height="24" as="geometry"/>
+    </mxCell>
+    <mxCell id="CIS2" value="unpublished" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=8;overflow=hidden;" vertex="1" parent="40">
+      <mxGeometry y="88" width="290" height="24" as="geometry"/>
+    </mxCell>
+    <mxCell id="R1" value="0..*" style="endArrow=none;startArrow=diamond;startFill=1;startSize=12;fontSize=10;labelBackgroundColor=none;" edge="1" source="10" target="20" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="R2" value="usa" style="endArrow=open;endFill=0;dashed=1;dashPattern=5 5;fontSize=10;labelBackgroundColor=none;" edge="1" source="10" target="40" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="R3" value="produce" style="endArrow=open;endFill=0;dashed=1;dashPattern=5 5;fontSize=10;labelBackgroundColor=none;endArrow=open;dashed=0;" edge="1" source="10" target="30" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+  </root>
+</mxGraphModel>
